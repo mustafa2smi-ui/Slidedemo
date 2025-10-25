@@ -13,6 +13,7 @@ body {
   transition: background 0.5s;
 }
 h2 { text-align: center; }
+
 .post-card, .detail-card {
   background: white;
   margin: 10px auto;
@@ -20,7 +21,14 @@ h2 { text-align: center; }
   border-radius: 15px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   max-width: 600px;
+  cursor: pointer;
+  transition: 0.3s;
 }
+
+.post-card:hover {
+  background: #f0f8ff;
+}
+
 button {
   margin: 5px;
   padding: 8px 12px;
@@ -28,6 +36,7 @@ button {
   border-radius: 10px;
   cursor: pointer;
 }
+
 .back-btn { background: #888; color: white; }
 .color-btn { background: #4CAF50; color: white; }
 .share-btn { background: #2196F3; color: white; }
@@ -37,25 +46,43 @@ button {
 <body>
 
 <h2>DarulIslam Q&A</h2>
-<div id="postsContainer">Loading...</div>
+<div id="postsContainer">Loading questions...</div>
 <div id="detailContainer" class="hidden"></div>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
 async function fetchPosts() {
-  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json'; // 👈 apna sheet publish URL yaha daalein
-  const res = await fetch(sheetUrl);
-  const data = await res.text();
-  const rows = data.split('\n').map(r => r.split(','));
-  const posts = rows.slice(1).map((r, i) => ({
-    id: i + 1,
-    title: r[0],
-    question: r[1],
-    answer: r[2],
-    reference: r[3],
-    date: r[4]
-  }));
-  renderPosts(posts);
+  // 👇 नीचे अपना Google Sheet ID और Sheet Name लिखें
+  const sheetID = "1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4";
+  const sheetName = "Sheet1";
+  const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+
+    // Google JSON से actual data निकालना
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+    const rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
+
+    const posts = rows.map((r, i) => ({
+      id: i + 1,
+      title: r[0],
+      question: r[1],
+      answer: r[2],
+      reference: r[3],
+      date: r[4]
+    }));
+
+    if (posts.length) renderPosts(posts);
+    else document.getElementById("postsContainer").innerHTML =
+      "<p style='text-align:center;'>⚙️ Under building website, please wait for live updates.</p>";
+
+  } catch (e) {
+    document.getElementById("postsContainer").innerHTML =
+      "<p style='text-align:center;color:red;'>⚠️ Error loading data. Please check Sheet permissions.</p>";
+    console.error(e);
+  }
 }
 
 function renderPosts(posts) {
@@ -66,7 +93,7 @@ function renderPosts(posts) {
       <small>${p.date || ''}</small>
     </div>
   `).join('');
-  window.allPosts = posts; // global store
+  window.allPosts = posts;
 }
 
 function openPost(id) {
@@ -113,7 +140,7 @@ async function shareAsImage() {
         title: "DarulIslam Q&A",
         text: "Check out this question from DarulIslam",
         files: [file]
-      }).catch(err => alert("Share canceled or failed"));
+      }).catch(() => alert("Share canceled or failed"));
     } else {
       alert("Your browser does not support image sharing");
     }
