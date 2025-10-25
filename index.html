@@ -10,7 +10,6 @@ body {
   background: #f7f7f7;
   margin: 0;
   padding: 10px;
-  transition: background 0.5s;
 }
 h2 { text-align: center; }
 
@@ -50,76 +49,55 @@ a {
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
-// 🔗 Link clickable function
+// 🔗 Make URLs clickable
 function makeLinksClickable(text) {
   if (!text) return "";
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
 }
-/*
-// 📄 Fetch data from Google Sheet
+
+// 📄 Fetch Google Sheet Data (✅ fixed version)
 async function fetchPosts() {
-  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
-  const res = await fetch(sheetUrl);
-  const text = await res.text();
-  const json = JSON.parse(text.substr(47).slice(0, -2));
-  const rows = json.table.rows;
-
-  const posts = rows.slice(1).map((r, i) => ({
-    id: i + 1,
-    title: r.c[0]?.v || "",
-    question: r.c[1]?.v || "",
-    answer: r.c[2]?.v || "",
-    reference: r.c[3]?.v || "",
-    date: r.c[4]?.f || r.c[4]?.v || "",
-    link: r.c[5]?.v || ""
-  })).filter(p => p.title && p.question); // blank rows ignore
-
-  renderPosts(posts);
-}
-*/
-  async function fetchPosts() {
   try {
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
     const res = await fetch(sheetUrl);
     const text = await res.text();
 
-    // Google Sheet JSON साफ़ करना
     const json = JSON.parse(text.substring(47, text.length - 2));
     const rows = json.table.rows;
 
-    const posts = rows.map((r, i) => ({
+    const posts = rows.slice(1).map((r, i) => ({
       id: i + 1,
       title: r.c[0]?.v || "",
       question: r.c[1]?.v || "",
       answer: r.c[2]?.v || "",
       reference: r.c[3]?.v || "",
-      date: (r.c[4]?.f || r.c[4]?.v || "").toString(), // ✅ Date fix
+      date: r.c[4]?.f || r.c[4]?.v || "",
       link: r.c[5]?.v || ""
     })).filter(p => p.title && p.question);
 
     renderPosts(posts);
-  /* } catch (e) {
+  } catch (e) {
     document.getElementById("postsContainer").innerHTML =
-      "<p style='color:red'>⚠️ Error loading data. Please check Sheet link or format.</p>";
+      "<p style='color:red'>⚠️ Error loading data. Check Google Sheet link.</p>";
     console.error("Sheet fetch error:", e);
-  } */
   }
-  
-  /*
-// 🧱 Render homepage cards
-function renderPosts(posts) {
-  const container = document.getElementById("postsContainer");
-  container.innerHTML = posts.map(p => `
-    <div class="post-card" onclick="openPost(${p.id})">
-      <h3>${p.title}</h3>
-      ${p.date ? `<small>${p.date}</small>` : ""}
-    </div>
-  `).join('');
-  window.allPosts = posts;
 }
-*/
-  // 🧱 render posts
+
+// 🌈 Random Gradient for each card
+function getRandomGradient() {
+  const gradients = [
+    "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
+    "linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)",
+    "linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)",
+    "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
+    "linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)",
+    "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)"
+  ];
+  return gradients[Math.floor(Math.random() * gradients.length)];
+}
+
+// 🧱 Render homepage cards
 function renderPosts(posts) {
   const container = document.getElementById("postsContainer");
   container.innerHTML = posts.map(p => `
@@ -128,12 +106,13 @@ function renderPosts(posts) {
       <p><b>Q:</b> ${p.question}</p>
       <p><b>A:</b> ${makeLinksClickable(p.answer)}</p>
       <p><i>${makeLinksClickable(p.reference || '')}</i></p>
-      ${p.date ? `<p><b>📅 Publish Date:</b> ${p.date}</p>` : ''}
+      ${p.date ? `<p><b>📅 Publish Date:</b> ${p.date}</p>` : ""}
     </div>
   `).join('');
   window.allPosts = posts;
 }
-// 🧩 Open detail card
+
+// 📄 Open full detail view
 function openPost(id) {
   const p = window.allPosts.find(x => x.id === id);
   const d = document.getElementById("detailContainer");
@@ -143,6 +122,7 @@ function openPost(id) {
       <p><b>Q:</b> ${p.question}</p>
       <p><b>A:</b> ${makeLinksClickable(p.answer)}</p>
       <p><i>${makeLinksClickable(p.reference || '')}</i></p>
+      ${p.date ? `<p><b>📅 Publish Date:</b> ${p.date}</p>` : ""}
       ${p.link ? `<p>🔗 <a href="${p.link}" target="_blank">View Source</a></p>` : ""}
       <div>
         <button class="back-btn" onclick="goBack()">⬅ Back</button>
@@ -155,37 +135,26 @@ function openPost(id) {
   d.classList.remove("hidden");
 }
 
-// 🔙 Back to main list
+// 🔙 Back button
 function goBack() {
   document.getElementById("detailContainer").classList.add("hidden");
   document.getElementById("postsContainer").classList.remove("hidden");
 }
 
-// 🌈 Gradient background generator
+// 🌈 Change gradient background in detail card
 function changeColor() {
   const card = document.getElementById("detailCard");
-  const gradients = [
-    "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
-    "linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)",
-    "linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)",
-    "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
-    "linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)",
-    "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)"
-  ];
-  const current = card.style.backgroundImage;
-  let next = gradients[Math.floor(Math.random() * gradients.length)];
-  while (next === current) next = gradients[Math.floor(Math.random() * gradients.length)];
-  card.style.backgroundImage = next;
+  card.style.backgroundImage = getRandomGradient();
 }
 
 // 📤 Share question as image (without buttons)
 async function shareAsImage() {
   const card = document.getElementById("detailCard");
   const buttons = card.querySelectorAll("button");
-  buttons.forEach(b => b.style.display = "none"); // hide before capture
-
+  buttons.forEach(b => b.style.display = "none");
   const canvas = await html2canvas(card);
-  buttons.forEach(b => b.style.display = ""); // restore buttons
+  buttons.forEach(b => b.style.display = "");
+
   canvas.toBlob(blob => {
     const file = new File([blob], "question.png", { type: "image/png" });
     if (navigator.share) {
