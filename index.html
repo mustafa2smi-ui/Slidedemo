@@ -90,6 +90,7 @@ function renderPosts(posts) {
   container.innerHTML = posts.map(p => `
     <div class="post-card" onclick="openPost(${p.id})">
       <h3>${p.title}</h3>
+      <p><i><a href="${p.reference}" target="_blank">${p.reference}</a></i></p>
       <small>${p.date || ''}</small>
     </div>
   `).join('');
