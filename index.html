@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DarulIslam - Q&A</title>
+<style>
+body {
+  font-family: sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 10px;
+}
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+.post-card, .detail-card {
+  background: white;
+  margin: 10px auto;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  max-width: 650px;
+  transition: background 0.5s;
+}
+
+button {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.back-btn { background: #555; color: white; }
+.color-btn { background: linear-gradient(45deg, #4CAF50, #2E7D32); color: white; }
+.share-btn { background: linear-gradient(45deg, #2196F3, #1976D2); color: white; }
+.hidden { display: none; }
+
+a {
+  color: #0d47a1;
+  text-decoration: underline;
+  word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<h2>DarulIslam - Q&A</h2>
+<div id="postsContainer">Loading...</div>
+<div id="detailContainer" class="hidden"></div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+// 🔗 Make URLs clickable
+function makeLinksClickable(text) {
+  if (!text) return "";
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+}
+
+// 🌈 Gradient generator
+function getRandomGradient() {
+  const gradients = [
+    "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
+    "linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)",
+    "linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)",
+    "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
+    "linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)",
+    "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)"
+  ];
+  return gradients[Math.floor(Math.random() * gradients.length)];
+}
+
+// 📄 Fetch Google Sheet Data
+async function fetchPosts() {
+  try {
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
+    const res = await fetch(sheetUrl);
+    const text = await res.text();
+
+    const json = JSON.parse(text.substring(47, text.length - 2));
+    const rows = json.table.rows;
+
+    // Map exactly by column
+    const posts = rows.slice(1).map((r, i) => ({
+      id: i + 1,
+      title: r.c[0]?.v || "",
+      question: r.c[1]?.v || "",
+      answer: r.c[2]?.v || "",
+      reference: r.c[3]?.v || "",
+      link: r.c[4]?.v || "",
+      lastUpdate: r.c[5]?.v || ""
+    })).filter(p => p.title && p.question);
+
+    renderPosts(posts);
+  } catch (e) {
+    document.getElementById("postsContainer").innerHTML =
+      "<p style='color:red'>⚠️ Error loading data. Please check Sheet link or access setting.</p>";
+    console.error("Sheet fetch error:", e);
+  }
+}
+
+// 🧱 Render posts list
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = posts.map(p => `
+    <div class="post-card" style="background:${getRandomGradient()}" onclick="openPost(${p.id})">
+      <h3>${p.title}</h3>
+      <p><b>Q:</b> ${p.question}</p>
+      <p><b>A:</b> ${makeLinksClickable(p.answer)}</p>
+      <p><b>Ref:</b> ${makeLinksClickable(p.reference)}</p>
+      <p><b>🔗 Link:</b> ${makeLinksClickable(p.link)}</p>
+      <p><b>🕓 Last Update:</b> ${p.lastUpdate}</p>
+    </div>
+  `).join('');
+  window.allPosts = posts;
+}
+
+// 🔍 Open full detail
+function openPost(id) {
+  const p = window.allPosts.find(x => x.id === id);
+  const d = document.getElementById("detailContainer");
+  d.innerHTML = `
+    <div class="detail-card" id="detailCard">
+      <p><b>Title:</b> ${p.title}</p>
+      <p><b>Question:</b> ${p.question}</p>
+      <p><b>Answer:</b> ${makeLinksClickable(p.answer)}</p>
+      <p><b>Reference:</b> ${makeLinksClickable(p.reference)}</p>
+      <p><b>Link:</b> ${makeLinksClickable(p.link)}</p>
+      <p><b>Last Update:</b> ${p.lastUpdate}</p>
+
+      <div>
+        <button class="back-btn" onclick="goBack()">⬅ Back</button>
+        <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+        <button class="share-btn" onclick="shareAsImage()">📤 Share</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("postsContainer").classList.add("hidden");
+  d.classList.remove("hidden");
+}
+
+// 🔙 Back button
+function goBack() {
+  document.getElementById("detailContainer").classList.add("hidden");
+  document.getElementById("postsContainer").classList.remove("hidden");
+}
+
+// 🌈 Change background
+function changeColor() {
+  const card = document.getElementById("detailCard");
+  card.style.backgroundImage = getRandomGradient();
+}
+
+// 📤 Share as Image (without buttons)
+async function shareAsImage() {
+  const card = document.getElementById("detailCard");
+  const buttons = card.querySelectorAll("button");
+  buttons.forEach(b => b.style.display = "none");
+
+  const canvas = await html2canvas(card);
+  buttons.forEach(b => b.style.display = "");
+
+  canvas.toBlob(blob => {
+    const file = new File([blob], "question.png", { type: "image/png" });
+    if (navigator.share) {
+      navigator.share({
+        title: "DarulIslam Q&A",
+        text: "Check out this Q&A from DarulIslam",
+        files: [file]
+      }).catch(() => alert("Share canceled or failed"));
+    } else {
+      alert("Your browser does not support image sharing");
+    }
+  });
+}
+
+fetchPosts();
+</script>
+</body>
+</html>
