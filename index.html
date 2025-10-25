@@ -56,7 +56,7 @@ function makeLinksClickable(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
 }
-
+/*
 // 📄 Fetch data from Google Sheet
 async function fetchPosts() {
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
@@ -77,7 +77,35 @@ async function fetchPosts() {
 
   renderPosts(posts);
 }
+*/
+  async function fetchPosts() {
+  try {
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
+    const res = await fetch(sheetUrl);
+    const text = await res.text();
 
+    // Google Sheet JSON साफ़ करना
+    const json = JSON.parse(text.substring(47, text.length - 2));
+    const rows = json.table.rows;
+
+    const posts = rows.map((r, i) => ({
+      id: i + 1,
+      title: r.c[0]?.v || "",
+      question: r.c[1]?.v || "",
+      answer: r.c[2]?.v || "",
+      reference: r.c[3]?.v || "",
+      date: (r.c[4]?.f || r.c[4]?.v || "").toString(), // ✅ Date fix
+      link: r.c[5]?.v || ""
+    })).filter(p => p.title && p.question);
+
+    renderPosts(posts);
+  } catch (e) {
+    document.getElementById("postsContainer").innerHTML =
+      "<p style='color:red'>⚠️ Error loading data. Please check Sheet link or format.</p>";
+    console.error("Sheet fetch error:", e);
+  }
+  }
+  /*
 // 🧱 Render homepage cards
 function renderPosts(posts) {
   const container = document.getElementById("postsContainer");
@@ -89,7 +117,21 @@ function renderPosts(posts) {
   `).join('');
   window.allPosts = posts;
 }
-
+*/
+  // 🧱 render posts
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = posts.map(p => `
+    <div class="post-card" style="background:${getRandomGradient()}" onclick="openPost(${p.id})">
+      <h3>${p.title}</h3>
+      <p><b>Q:</b> ${p.question}</p>
+      <p><b>A:</b> ${makeLinksClickable(p.answer)}</p>
+      <p><i>${makeLinksClickable(p.reference || '')}</i></p>
+      ${p.date ? `<p><b>📅 Publish Date:</b> ${p.date}</p>` : ''}
+    </div>
+  `).join('');
+  window.allPosts = posts;
+}
 // 🧩 Open detail card
 function openPost(id) {
   const p = window.allPosts.find(x => x.id === id);
