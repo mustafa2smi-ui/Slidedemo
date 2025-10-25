@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DarulIslam - Islamic Q&A</title>
+<meta name="description" content="DarulIslam: Authentic Islamic Q&A with references from Quran, Hadith, and scholars. Learn answers to daily life Islamic questions.">
+<meta property="og:title" content="DarulIslam - Islamic Q&A">
+<meta property="og:description" content="Find verified Islamic answers from scholars.">
+<meta property="og:image" content="https://your-website.com/islamic-thumbnail.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://your-website.com/">
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f6f6f6;
+  margin: 0;
+  padding: 10px;
+}
+h2 { text-align: center; color: #2b2b2b; }
+
+.post-card, .detail-card {
+  background: white;
+  margin: 10px auto;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  max-width: 600px;
+  transition: background 0.5s;
+}
+button {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.back-btn { background: #888; color: white; }
+.color-btn { background: #4CAF50; color: white; }
+.share-btn { background: #2196F3; color: white; }
+.hidden { display: none; }
+
+a { color: #0077cc; text-decoration: none; }
+a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<h2>DarulIslam - Q&A</h2>
+<div id="postsContainer">Loading...</div>
+<div id="detailContainer" class="hidden"></div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+async function fetchPosts() {
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
+  const res = await fetch(sheetUrl);
+  const text = await res.text();
+  const json = JSON.parse(text.substr(47).slice(0, -2));
+
+  const posts = json.table.rows.map((r, i) => ({
+    id: i + 1,
+    title: r.c[0]?.v || "",
+    question: r.c[1]?.v || "",
+    answer: r.c[2]?.v || "",
+    reference: r.c[3]?.v || "",
+    link: r.c[4]?.v || "",
+    date: r.c[5]?.v || ""
+  }));
+
+  renderPosts(posts);
+}
+
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = posts.map(p => `
+    <div class="post-card" onclick="openPost(${p.id})">
+      <h3>${p.title}</h3>
+    </div>
+  `).join('');
+  window.allPosts = posts;
+}
+
+function makeLinksClickable(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+}
+
+function openPost(id) {
+  const p = window.allPosts.find(x => x.id === id);
+  const d = document.getElementById("detailContainer");
+  d.innerHTML = `
+    <div class="detail-card" id="detailCard">
+      <p><b>Title:</b> ${p.title}</p>
+      <p><b>Question:</b> ${p.question}</p>
+      <p><b>Answer:</b> ${makeLinksClickable(p.answer)}</p>
+      <p><b>Reference:</b> ${makeLinksClickable(p.reference)}</p>
+      <p><b>Link:</b> ${p.link ? `<a href="${p.link}" target="_blank">🔗 View Source</a>` : "—"}</p>
+      <p><b>Last Update:</b> ${p.date || "—"}</p>
+      <div>
+        <button class="back-btn" onclick="goBack()">⬅ Back</button>
+        <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+        <button class="share-btn" onclick="shareAsImage('${encodeURIComponent(p.title)}')">📤 Share</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("postsContainer").classList.add("hidden");
+  d.classList.remove("hidden");
+}
+
+function goBack() {
+  document.getElementById("detailContainer").classList.add("hidden");
+  document.getElementById("postsContainer").classList.remove("hidden");
+}
+
+function changeColor() {
+  const card = document.getElementById("detailCard");
+  const gradients = [
+    "linear-gradient(135deg, #fff3cd, #ffe0b2)",
+    "linear-gradient(135deg, #e1f5fe, #b3e5fc)",
+    "linear-gradient(135deg, #e8f5e9, #c8e6c9)",
+    "linear-gradient(135deg, #f3e5f5, #e1bee7)",
+    "linear-gradient(135deg, #ffebee, #ffcdd2)"
+  ];
+  const current = card.style.background;
+  let next = gradients[Math.floor(Math.random() * gradients.length)];
+  while(next === current) next = gradients[Math.floor(Math.random() * gradients.length)];
+  card.style.background = next;
+}
+
+async function shareAsImage(title) {
+  const card = document.getElementById("detailCard");
+  const canvas = await html2canvas(card);
+  canvas.toBlob(blob => {
+    const file = new File([blob], "masail.png", { type: "image/png" });
+    if (navigator.share) {
+      navigator.share({
+        title: decodeURIComponent(title),
+        text: "Islamic Masail ka jawab dekhne ke liye:",
+        files: [file],
+        url: window.location.href
+      }).catch(err => console.log("Share canceled"));
+    } else {
+      alert("Your browser does not support image sharing");
+    }
+  });
+}
+
+fetchPosts();
+</script>
+
+</body>
+</html>
