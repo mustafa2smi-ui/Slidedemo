@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DarulIslam - Slides View</title>
+<style>
+body {
+  font-family: "Poppins", sans-serif;
+  background: #f3f3f3;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+header {
+  text-align: center;
+  background: #1a237e;
+  color: white;
+  padding: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+#slideList {
+  padding: 15px;
+}
+.slide-item {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  margin: 8px 0;
+  padding: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.slide-item:hover {
+  background: #e3f2fd;
+}
+#slideViewer {
+  display: none;
+  text-align: center;
+  padding: 15px;
+}
+#slideViewer img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+  background: white;
+  transition: background 0.4s;
+}
+.buttons {
+  margin-top: 10px;
+}
+button {
+  margin: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #1a237e;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+button:hover {
+  background: #3949ab;
+}
+</style>
+</head>
+<body>
+
+<header>🕌 DarulIslam Q&A</header>
+
+<div id="slideList">
+  <p style="text-align:center;opacity:0.7;">Slides are loading...</p>
+</div>
+
+<div id="slideViewer">
+  <div id="slideContent"></div>
+  <div class="buttons">
+    <button onclick="shareSlide()">📤 Share Image</button>
+    <button onclick="changeSlideTheme()">🎨 Change Background</button>
+    <button onclick="goBack()">⬅️ Back</button>
+  </div>
+</div>
+
+<script>
+/* 🔹 STEP 1: Apna Google Slides publish link paste kare */
+const slidesBase = "https://docs.google.com/presentation/d/e/2PACX-1vR123abc/pub?slide=id.p";
+
+/* 🔹 STEP 2: Slides Count (for demo — aap badha sakte ho) */
+let totalSlides = 5; // <-- replace with actual slide count
+
+/* 🔹 STEP 3: Show list of available slides */
+const list = document.getElementById("slideList");
+list.innerHTML = ""; // clear loading text
+
+for (let i = 1; i <= totalSlides; i++) {
+  const item = document.createElement("div");
+  item.className = "slide-item";
+  item.textContent = "Slide " + i;
+  item.onclick = () => openSlide(i);
+  list.appendChild(item);
+}
+
+/* 🔹 STEP 4: Open slide in viewer */
+const viewer = document.getElementById("slideViewer");
+const content = document.getElementById("slideContent");
+let currentSlide = 1;
+let currentColor = 0;
+const slideThemes = ["#ffffff", "#fff3e0", "#e3f2fd", "#e8f5e9", "#ede7f6"];
+
+function openSlide(num) {
+  currentSlide = num;
+  list.style.display = "none";
+  viewer.style.display = "block";
+  content.innerHTML = `<img id="slideImg" src="${slidesBase}${num}" alt="Slide ${num}">`;
+}
+
+/* 🔹 STEP 5: Go back to list */
+function goBack() {
+  viewer.style.display = "none";
+  list.style.display = "block";
+}
+
+/* 🔹 STEP 6: Change only slide background (not whole site) */
+function changeSlideTheme() {
+  currentColor = (currentColor + 1) % slideThemes.length;
+  document.getElementById("slideImg").style.background = slideThemes[currentColor];
+}
+
+/* 🔹 STEP 7: Share as Image */
+function shareSlide() {
+  const img = document.getElementById("slideImg").src;
+  if (navigator.share) {
+    navigator.share({
+      title: "DarulIslam Q&A",
+      text: "📖 Islamic Reference Slide",
+      url: img
+    });
+  } else {
+    alert("Sharing not supported in this browser.");
+  }
+}
+</script>
+
+</body>
+</html>
