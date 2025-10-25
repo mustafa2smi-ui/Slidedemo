@@ -51,7 +51,8 @@ a:hover { text-decoration: underline; }
 <div id="detailContainer" class="hidden"></div>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script>
+<!--
+  <script>
 async function fetchPosts() {
   const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
   const res = await fetch(sheetUrl);
@@ -148,6 +149,118 @@ async function shareAsImage(title) {
 
 fetchPosts();
 </script>
+-->
+  <script>
+async function fetchPosts() {
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json';
+  const res = await fetch(sheetUrl);
+  const text = await res.text();
+  const json = JSON.parse(text.substr(47).slice(0, -2));
 
+  const posts = json.table.rows.map((r, i) => {
+    let rawDate = r.c[5]?.v || "";
+    
+    // 🩵 Google Sheet date cleanup (if it’s in Date(yyyy,mm,dd) format)
+    if (/Date\(\d+,\d+,\d+\)/.test(rawDate)) {
+      const match = rawDate.match(/Date\((\d+),(\d+),(\d+)\)/);
+      if (match) {
+        const year = match[1];
+        const month = String(parseInt(match[2]) + 1).padStart(2, '0');
+        const day = String(match[3]).padStart(2, '0');
+        rawDate = `${day}/${month}/${year}`;
+      }
+    }
+
+    return {
+      id: i + 1,
+      title: r.c[0]?.v || "",
+      question: r.c[1]?.v || "",
+      answer: r.c[2]?.v || "",
+      reference: r.c[3]?.v || "",
+      link: r.c[4]?.v || "",
+      date: rawDate.trim()
+    };
+  });
+
+  renderPosts(posts);
+}
+
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = posts.map(p => `
+    <div class="post-card" onclick="openPost(${p.id})">
+      <h3>${p.title}</h3>
+    </div>
+  `).join('');
+  window.allPosts = posts;
+}
+
+function makeLinksClickable(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+}
+
+function openPost(id) {
+  const p = window.allPosts.find(x => x.id === id);
+  const d = document.getElementById("detailContainer");
+  d.innerHTML = `
+    <div class="detail-card" id="detailCard">
+      <p><b>Title:</b> ${p.title}</p>
+      <p><b>Question:</b> ${p.question}</p>
+      <p><b>Answer:</b> ${makeLinksClickable(p.answer)}</p>
+      <p><b>Reference:</b> ${makeLinksClickable(p.reference)}</p>
+      <p><b>Link:</b> ${p.link ? `<a href="${p.link}" target="_blank">🔗 View Source</a>` : "—"}</p>
+      <p><b>Last Update:</b> ${p.date || "—"}</p>
+      <div>
+        <button class="back-btn" onclick="goBack()">⬅ Back</button>
+        <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+        <button class="share-btn" onclick="shareAsImage('${encodeURIComponent(p.title)}')">📤 Share</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("postsContainer").classList.add("hidden");
+  d.classList.remove("hidden");
+}
+
+function goBack() {
+  document.getElementById("detailContainer").classList.add("hidden");
+  document.getElementById("postsContainer").classList.remove("hidden");
+}
+
+function changeColor() {
+  const card = document.getElementById("detailCard");
+  const gradients = [
+    "linear-gradient(135deg, #fff3cd, #ffe0b2)",
+    "linear-gradient(135deg, #e1f5fe, #b3e5fc)",
+    "linear-gradient(135deg, #e8f5e9, #c8e6c9)",
+    "linear-gradient(135deg, #f3e5f5, #e1bee7)",
+    "linear-gradient(135deg, #ffebee, #ffcdd2)"
+  ];
+  const current = card.style.background;
+  let next = gradients[Math.floor(Math.random() * gradients.length)];
+  while(next === current) next = gradients[Math.floor(Math.random() * gradients.length)];
+  card.style.background = next;
+}
+
+async function shareAsImage(title) {
+  const card = document.getElementById("detailCard");
+  const canvas = await html2canvas(card);
+  canvas.toBlob(blob => {
+    const file = new File([blob], "masail.png", { type: "image/png" });
+    if (navigator.share) {
+      navigator.share({
+        title: decodeURIComponent(title),
+        text: "Islamic Masail ka jawab dekhne ke liye:",
+        files: [file],
+        url: window.location.href
+      }).catch(err => console.log("Share canceled"));
+    } else {
+      alert("Your browser does not support image sharing");
+    }
+  });
+}
+
+fetchPosts();
+    </script>
 </body>
 </html>
