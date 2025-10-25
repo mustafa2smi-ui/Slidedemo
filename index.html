@@ -65,7 +65,7 @@ async function fetchPosts() {
   const json = JSON.parse(text.substr(47).slice(0, -2));
   const rows = json.table.rows;
 
-  const posts = rows.map((r, i) => ({
+  const posts = rows.slice(1).map((r, i) => ({
     id: i + 1,
     title: r.c[0]?.v || "",
     question: r.c[1]?.v || "",
