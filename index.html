@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DarulIslam — Slides Demo</title>
+<style>
+  :root{ --gap:12px; --card-radius:10px; }
+  body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "Helvetica", sans-serif; margin:0; padding:18px; transition:background .25s, color .25s; }
+  .topbar{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .left-group{ display:flex; gap:10px; align-items:center; }
+  .theme-buttons button, .action-buttons button{ padding:8px 10px; border-radius:8px; border: none; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.12); }
+  .theme-buttons button{ min-width:72px; }
+  .action-buttons button{ background:#fff; }
+  #locationInfo{ font-size:0.9rem; opacity:0.9; }
+  #slidesContainer{ display:flex; flex-wrap:wrap; gap:var(--gap); }
+  .slide-card{ width:calc(33.333% - 12px); background:var(--card-bg); color:inherit; border-radius:var(--card-radius); box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden; transition:transform .12s; display:flex; flex-direction:column; align-items:stretch; }
+  .slide-card img{ width:100%; display:block; object-fit:cover; height:180px; }
+  .slide-card .meta{ padding:10px; display:flex; gap:8px; align-items:center; justify-content:space-between; }
+  .slide-card .meta .title{ font-weight:600; font-size:0.95rem; }
+  .slide-card button{ margin-left:auto; }
+  .hidden{ display:none !important; }
+  #viewer{ margin-top:18px; background:var(--card-bg); border-radius:10px; padding:10px; box-shadow:0 8px 18px rgba(0,0,0,0.07); }
+  #viewer iframe{ width:100%; height:480px; border:0; border-radius:8px; display:block; }
+  .controls{ margin-top:8px; display:flex; gap:8px; }
+  .small{ font-size:0.9rem; padding:6px 8px; }
+  /* Responsive */
+  @media (max-width:900px){ .slide-card{ width:calc(50% - 12px); } }
+  @media (max-width:520px){ .slide-card{ width:100%; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="left-group">
+    <div class="theme-buttons">
+      <button onclick="setTheme('light')">🌤 Light</button>
+      <button onclick="setTheme('dark')">🌙 Dark</button>
+      <button onclick="setTheme('green')">🌿 Green</button>
+      <button onclick="setTheme('blue')">💧 Blue</button>
+    </div>
+    <div style="width:10px"></div>
+    <div class="action-buttons">
+      <button id="useLocationBtn">📍 Use My Location</button>
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div id="locationInfo">Location: <span id="locText">Default (Delhi)</span></div>
+  </div>
+</div>
+
+<!-- Slides cards -->
+<div id="slidesContainer"></div>
+
+<!-- Show more -->
+<div style="margin-top:12px; text-align:center;">
+  <button id="showMoreBtn" class="small">Show More</button>
+</div>
+
+<!-- Viewer (where single slide opens) -->
+<div id="viewer" class="hidden">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div><strong id="viewerTitle">Slide</strong></div>
+    <div class="controls">
+      <button id="backBtn" class="small">⬅ Back</button>
+      <button id="shareBtn" class="small">🔗 Share Image</button>
+      <button id="openTabBtn" class="small">🔎 Open Image</button>
+    </div>
+  </div>
+  <div id="iframeWrap" style="margin-top:10px;"></div>
+</div>
+
+<script>
+/* ---------------- config: replace these ----------------
+1) SLIDE_BASE: replace with your published Slides base link (publish to web -> Link).
+   Example of published link:
+   https://docs.google.com/presentation/d/e/2PACX-1vR123abc/pub
+   For image per slide we will use: SLIDE_BASE + '?slide=id.p' + slideNumber
+2) TOTAL_SLIDES: set number of slides you have (e.g., 60)
+------------------------------------------------------- */
+
+const SLIDE_BASE = "https://docs.google.com/presentation/d/e/2PACX-1vR123abc/pub"; // <-- REPLACE this with your publish link base
+const TOTAL_SLIDES = 12; // <-- set to your total slides count
+
+/* ---------------- end config ---------------- */
+
+const slidesContainer = document.getElementById('slidesContainer');
+const viewer = document.getElementById('viewer');
+const iframeWrap = document.getElementById('iframeWrap');
+const viewerTitle = document.getElementById('viewerTitle');
+const backBtn = document.getElementById('backBtn');
+const shareBtn = document.getElementById('shareBtn');
+const openTabBtn = document.getElementById('openTabBtn');
+const showMoreBtn = document.getElementById('showMoreBtn');
+
+const themes = {
+  light: { bg: "#f9f9f9", text: "#111", card: "#ffffff" },
+  dark:  { bg: "#0f1114", text: "#f3f3f3", card: "#121214" },
+  green: { bg: "#eaf8ef", text: "#0b3b26", card: "#d8f0dc" },
+  blue:  { bg: "#e9f4ff", text: "#083461", card: "#dbeeff" },
+};
+
+// ---------- Theme logic ----------
+function applyTheme(name){
+  const t = themes[name] || themes.light;
+  document.body.style.backgroundColor = t.bg;
+  document.body.style.color = t.text;
+  document.querySelectorAll('.slide-card').forEach(el=>{
+    el.style.background = t.card;
+    el.style.color = t.text;
+  });
+  document.documentElement.style.setProperty('--card-bg', t.card);
+  localStorage.setItem('selectedTheme', name);
+}
+function setTheme(name){ applyTheme(name); }
+window.addEventListener('load', ()=>{
+  const saved = localStorage.getItem('selectedTheme') || null;
+  if(saved) applyTheme(saved);
+  else {
+    // default based on time (optional)
+    const hour = new Date().getHours();
+    applyTheme((hour>=19||hour<6) ? 'dark' : 'light');
+  }
+});
+
+/* ---------- Location logic ---------- */
+const locText = document.getElementById('locText');
+const useLocationBtn = document.getElementById('useLocationBtn');
+
+function showSalahTime(locObj){
+  // placeholder — yaha aapka asli Salah time render function call karein
+  // locObj = { lat, lon, city }
+  locText.textContent = `${locObj.city} (${locObj.lat?.toFixed?.(2) || ''}, ${locObj.lon?.toFixed?.(2) || ''})`;
+  // Example: calculate & show salah time using API or local algorithm
+}
+
+window.addEventListener('load', ()=>{
+  const savedLoc = localStorage.getItem('userLocation');
+  if(savedLoc){
+    try{ showSalahTime(JSON.parse(savedLoc)); }
+    catch(e){ console.warn('Invalid saved location'); }
+  } else {
+    // default Delhi
+    showSalahTime({ lat:28.6139, lon:77.2090, city:'Delhi' });
+  }
+});
+
+useLocationBtn.addEventListener('click', ()=>{
+  if(!navigator.geolocation) return alert('Geolocation not supported');
+  useLocationBtn.disabled = true;
+  useLocationBtn.textContent = 'Locating…';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude, city: 'My Location' };
+    localStorage.setItem('userLocation', JSON.stringify(loc));
+    showSalahTime(loc);
+    useLocationBtn.textContent = '📍 Use My Location';
+    useLocationBtn.disabled = false;
+  }, err=>{
+    alert('Location error: ' + (err.message||err.code));
+    useLocationBtn.textContent = '📍 Use My Location';
+    useLocationBtn.disabled = false;
+  }, { enableHighAccuracy:true, timeout:10000 });
+});
+
+/* ---------- Slides rendering ---------- */
+
+function slideImageUrl(n){
+  // Google slides published URL per slide:
+  // SLIDE_BASE + '?slide=id.p' + n
+  return `${SLIDE_BASE}?slide=id.p${n}`;
+}
+
+function renderSlides(total){
+  slidesContainer.innerHTML = '';
+  for(let i=1;i<=total;i++){
+    const card = document.createElement('div');
+    card.className = 'slide-card';
+    // initially hide cards beyond first 3
+    if(i>3) card.classList.add('hidden', 'to-be-shown');
+    card.innerHTML = `
+      <img loading="lazy" src="${slideImageUrl(i)}" alt="Slide ${i}" onerror="this.style.opacity='.5';">
+      <div class="meta">
+        <div class="title">Slide ${i}</div>
+        <div>
+          <button class="small" onclick="openSlide(${i})">Read More</button>
+        </div>
+      </div>
+    `;
+    slidesContainer.appendChild(card);
+  }
+  // reapply theme to update card backgrounds
+  const curTheme = localStorage.getItem('selectedTheme') || null;
+  applyTheme(curTheme || 'light');
+}
+
+function openSlide(n){
+  viewer.classList.remove('hidden');
+  viewerTitle.textContent = `Slide ${n}`;
+  iframeWrap.innerHTML = `<iframe src="${slideImageUrl(n)}&start=false&loop=false" allowfullscreen></iframe>`;
+  // store current slide index for share/open
+  viewer.dataset.current = n;
+  window.scrollTo({ top: viewer.offsetTop - 12, behavior:'smooth' });
+}
+
+backBtn.addEventListener('click', ()=>{
+  viewer.classList.add('hidden');
+  iframeWrap.innerHTML = '';
+  delete viewer.dataset.current;
+  window.scrollTo({ top: 0, behavior:'smooth' });
+});
+
+showMoreBtn.addEventListener('click', ()=>{
+  document.querySelectorAll('.to-be-shown').forEach(el=>el.classList.remove('hidden'));
+  showMoreBtn.style.display = 'none';
+});
+
+/* ---------- Share/Open Image logic ---------- */
+
+async function fetchImageBlob(url){
+  // fetch image as blob (CORS should allow — published slides usually allow)
+  const r = await fetch(url, { mode: 'cors' });
+  if(!r.ok) throw new Error('Failed to fetch image');
+  return await r.blob();
+}
+
+async function shareCurrentImage(){
+  const idx = viewer.dataset.current;
+  if(!idx) return alert('No slide open');
+  const imgUrl = slideImageUrl(idx);
+  try{
+    const blob = await fetchImageBlob(imgUrl);
+    const file = new File([blob], `slide-${idx}.png`, { type: blob.type || 'image/png' });
+
+    // If native share with files is available
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], title: `Slide ${idx}`, text: 'Sharing slide image' });
+      return;
+    }
+
+    // If ClipboardItem supported, try clipboard write (user can paste)
+    if(navigator.clipboard && navigator.ClipboardItem){
+      try{
+        await navigator.clipboard.write([new ClipboardItem({ [file.type]: file })]);
+        alert('Image copied to clipboard — paste it where you want (chat/email).');
+        return;
+      }catch(e){
+        // fallback
+      }
+    }
+
+    // Fallback: open image in new tab for manual save/share
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
+    // release blobUrl after some time
+    setTimeout(()=>URL.revokeObjectURL(blobUrl), 60_000);
+  }catch(err){
+    console.error(err);
+    alert('Unable to share image. Opening image in new tab instead.');
+    window.open(imgUrl, '_blank');
+  }
+}
+
+shareBtn.addEventListener('click', shareCurrentImage);
+
+openTabBtn.addEventListener('click', ()=>{
+  const idx = viewer.dataset.current;
+  if(!idx) return alert('No slide open');
+  // open full-size image URL in new tab (user can save)
+  const url = slideImageUrl(idx);
+  window.open(url, '_blank');
+});
+
+/* ---------- Initialize ---------- */
+renderSlides(TOTAL_SLIDES);
+</script>
+
+</body>
+</html>
