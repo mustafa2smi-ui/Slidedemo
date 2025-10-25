@@ -99,12 +99,13 @@ async function fetchPosts() {
     })).filter(p => p.title && p.question);
 
     renderPosts(posts);
-  } catch (e) {
+  /* } catch (e) {
     document.getElementById("postsContainer").innerHTML =
       "<p style='color:red'>⚠️ Error loading data. Please check Sheet link or format.</p>";
     console.error("Sheet fetch error:", e);
+  } */
   }
-  }
+  
   /*
 // 🧱 Render homepage cards
 function renderPosts(posts) {
