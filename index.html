@@ -173,6 +173,7 @@ async function fetchPosts() {
 
     return {
       id: i + 1,
+      image: r.c[6]?.v || "",
       title: r.c[0]?.v || "",
       question: r.c[1]?.v || "",
       answer: r.c[2]?.v || "",
@@ -209,12 +210,14 @@ function openPost(id) {
       <p><b>Question:</b> ${p.question}</p>
       <p><b>Answer:</b> ${makeLinksClickable(p.answer)}</p>
       <p><b>Reference:</b> ${makeLinksClickable(p.reference)}</p>
+      ${p.image ? `<p><b>Image:</b> <img src="${p.image}" style="max-width:100%; border-radius:10px;"></p>` : ""}
       <p><b>Link:</b> ${p.link ? `<a href="${p.link}" target="_blank">🔗 View Source</a>` : "—"}</p>
       <p><b>Last Update:</b> ${p.date || "—"}</p>
       <div>
         <button class="back-btn" onclick="goBack()">⬅ Back</button>
         <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
-        <button class="share-btn" onclick="shareAsImage('${encodeURIComponent(p.title)}')">📤 Share</button>
+        
+        <button class="share-btn" onclick="shareAsImage(${p.id})">📤 Share</button>
       </div>
     </div>
   `;
@@ -241,25 +244,66 @@ function changeColor() {
   while(next === current) next = gradients[Math.floor(Math.random() * gradients.length)];
   card.style.background = next;
 }
-
-async function shareAsImage(title) {
-  const card = document.getElementById("detailCard");
-  const canvas = await html2canvas(card);
-  canvas.toBlob(blob => {
-    const file = new File([blob], "masail.png", { type: "image/png" });
-    if (navigator.share) {
+/*
+// 📤 Share question as image (without buttons)  
+async function shareAsImage() {  
+  const card = document.getElementById("detailCard");  
+  const buttons = card.querySelectorAll("button");  
+  buttons.forEach(b => b.style.display = "none"); // hide before capture  
+  
+  const canvas = await html2canvas(card);  
+  buttons.forEach(b => b.style.display = ""); // restore buttons  
+  canvas.toBlob(blob => {  
+    const file = new File([blob], "question.png", { type: "image/png" });  
+    if (navigator.share) {  
+      navigator.share({  
+        title: "DarulIslam Q&A",  
+        text: "Check out this question from DarulIslam",  
+        files: [file]  
+      }).catch(() => alert("Share canceled or failed"));  
+    } else {  
+      alert("Your browser does not support image sharing");  
+    }  
+  });  
+}  
+*/
+    async function shareAsImage(id) {
+  const p = window.allPosts.find(x => x.id === id);
+  if(p.image) {
+    // Share only the image
+    const res = await fetch(p.image);
+    const blob = await res.blob();
+    const file = new File([blob], "question-image.png", {type: blob.type});
+    if(navigator.share) {
       navigator.share({
-        title: decodeURIComponent(title),
-        text: "Islamic Masail ka jawab dekhne ke liye:",
-        files: [file],
-        url: window.location.href
-      }).catch(err => console.log("Share canceled"));
+        title: p.title,
+        text: "Check out this question from DarulIslam",
+        files: [file]
+      }).catch(()=>alert("Share canceled or failed"));
     } else {
       alert("Your browser does not support image sharing");
     }
-  });
-}
-
+  } else {
+    // Share card as image
+    const card = document.getElementById("detailCard");
+    const buttons = card.querySelectorAll("button");
+    buttons.forEach(b => b.style.display = "none"); 
+    const canvas = await html2canvas(card);
+    buttons.forEach(b => b.style.display = ""); 
+    canvas.toBlob(blob => {
+      const file = new File([blob], "question.png", { type: "image/png" });
+      if (navigator.share) {
+        navigator.share({
+          title: p.title,
+          text: "Check out this question from DarulIslam",
+          files: [file]
+        }).catch(() => alert("Share canceled or failed"));
+      } else {
+        alert("Your browser does not support image sharing");
+      }
+    });
+  }
+    }
 fetchPosts();
     </script>
 </body>
