@@ -43,7 +43,7 @@ button {
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
 async function fetchPosts() {
-  const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/pub?output=csv'; // 👈 apna sheet publish URL yaha daalein
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json'; // 👈 apna sheet publish URL yaha daalein
   const res = await fetch(sheetUrl);
   const data = await res.text();
   const rows = data.split('\n').map(r => r.split(','));
