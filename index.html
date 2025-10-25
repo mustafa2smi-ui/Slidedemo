@@ -65,7 +65,7 @@ async function fetchPosts() {
     const json = JSON.parse(text.substr(47).slice(0, -2));
     const rows = json.table.rows.map(r => r.c.map(c => c ? c.v : ""));
 
-    const posts = rows.map((r, i) => ({
+    const posts = rows.slice(1).map((r, i) => ({
       id: i + 1,
       title: r[0],
       question: r[1],
@@ -132,7 +132,16 @@ function changeColor() {
 
 async function shareAsImage() {
   const card = document.getElementById("detailCard");
+  const buttons = card.querySelectorAll("button");
+
+  // 🔹 Hide buttons before capture
+  buttons.forEach(btn => btn.style.display = "none");
+
   const canvas = await html2canvas(card);
+
+  // 🔹 Restore buttons
+  buttons.forEach(btn => btn.style.display = "inline-block");
+
   canvas.toBlob(blob => {
     const file = new File([blob], "question.png", { type: "image/png" });
     if (navigator.share) {
