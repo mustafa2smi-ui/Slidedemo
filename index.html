@@ -71,7 +71,7 @@ async function fetchPosts() {
     question: r.c[1]?.v || "",
     answer: r.c[2]?.v || "",
     reference: r.c[3]?.v || "",
-    date: r.c[4]?.v || "",
+    date: r.c[4]?.f || r.c[4]?.v || "",
     link: r.c[5]?.v || ""
   })).filter(p => p.title && p.question); // blank rows ignore
 
