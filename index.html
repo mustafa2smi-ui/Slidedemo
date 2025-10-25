@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DarulIslam - Q&A</title>
+<style>
+body {
+  font-family: sans-serif;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 10px;
+  transition: background 0.5s;
+}
+h2 { text-align: center; }
+.post-card, .detail-card {
+  background: white;
+  margin: 10px auto;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  max-width: 600px;
+}
+button {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.back-btn { background: #888; color: white; }
+.color-btn { background: #4CAF50; color: white; }
+.share-btn { background: #2196F3; color: white; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<h2>DarulIslam Q&A</h2>
+<div id="postsContainer">Loading...</div>
+<div id="detailContainer" class="hidden"></div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+async function fetchPosts() {
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/your-sheet-id/pub?output=csv'; // 👈 apna sheet publish URL yaha daalein
+  const res = await fetch(sheetUrl);
+  const data = await res.text();
+  const rows = data.split('\n').map(r => r.split(','));
+  const posts = rows.slice(1).map((r, i) => ({
+    id: i + 1,
+    title: r[0],
+    question: r[1],
+    answer: r[2],
+    reference: r[3],
+    date: r[4]
+  }));
+  renderPosts(posts);
+}
+
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = posts.map(p => `
+    <div class="post-card" onclick="openPost(${p.id})">
+      <h3>${p.title}</h3>
+      <small>${p.date || ''}</small>
+    </div>
+  `).join('');
+  window.allPosts = posts; // global store
+}
+
+function openPost(id) {
+  const p = window.allPosts.find(x => x.id === id);
+  const d = document.getElementById("detailContainer");
+  d.innerHTML = `
+    <div class="detail-card" id="detailCard">
+      <h3>${p.title}</h3>
+      <p><b>Q:</b> ${p.question}</p>
+      <p><b>A:</b> ${p.answer}</p>
+      <p><i>${p.reference || ''}</i></p>
+      <div>
+        <button class="back-btn" onclick="goBack()">⬅ Back</button>
+        <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+        <button class="share-btn" onclick="shareAsImage()">📤 Share</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("postsContainer").classList.add("hidden");
+  d.classList.remove("hidden");
+}
+
+function goBack() {
+  document.getElementById("detailContainer").classList.add("hidden");
+  document.getElementById("postsContainer").classList.remove("hidden");
+}
+
+function changeColor() {
+  const card = document.getElementById("detailCard");
+  const colors = ['#fffbe7', '#e7f7ff', '#e7ffe9', '#f7e7ff', '#ffe7e7'];
+  const current = card.style.background || '#ffffff';
+  let next = colors[Math.floor(Math.random() * colors.length)];
+  while(next === current) next = colors[Math.floor(Math.random() * colors.length)];
+  card.style.background = next;
+}
+
+async function shareAsImage() {
+  const card = document.getElementById("detailCard");
+  const canvas = await html2canvas(card);
+  canvas.toBlob(blob => {
+    const file = new File([blob], "question.png", { type: "image/png" });
+    if (navigator.share) {
+      navigator.share({
+        title: "DarulIslam Q&A",
+        text: "Check out this question from DarulIslam",
+        files: [file]
+      }).catch(err => alert("Share canceled or failed"));
+    } else {
+      alert("Your browser does not support image sharing");
+    }
+  });
+}
+
+fetchPosts();
+</script>
+
+</body>
+</html>
