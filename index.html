@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Islamic Q&A, Dua, Hajj, and Fiqh solutions with authentic references.">
+<meta property="og:title" content="Darul Islam Q&A" />
+<meta property="og:description" content="Authentic Islamic Questions and Answers." />
+<meta property="og:image" content="icon-512.png" />
+<meta property="og:url" content="https://YOUR-NETLIFY-URL.netlify.app" />
+<title>Darul Islam Q&A</title>
+<link rel="manifest" href="manifest.json" />
+<style>
+  body {font-family: sans-serif; background:#f9f9f9; margin:0; padding:0;}
+  header {background:#004d40; color:white; padding:15px; text-align:center;}
+  .card, .post-card {background:white; margin:15px; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;}
+  .card img {max-width:100%; border-radius:10px; margin-top:8px;}
+  .share-btn, .img-share-btn, .color-btn, .back-btn {border:none; padding:8px 15px; border-radius:8px; cursor:pointer; margin-top:10px;}
+  .share-btn {background:#00897b; color:white;}
+  .img-share-btn {background:#4caf50; color:white;}
+  .color-btn {background:#ff9800; color:white;}
+  .back-btn {background:#607d8b; color:white;}
+  .menu {background:#004d40; color:white; display:flex; justify-content:space-around; padding:10px;}
+  .menu a {color:white; text-decoration:none; font-weight:bold;}
+  .hidden {display:none;}
+
+  /* 🆕 YouTube Embed Styling */
+  .youtube-embed { margin-top: 15px; margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h2>Darul Islam Q&A</h2>
+</header>
+
+<div class="menu">
+  <a href="#" onclick="loadSheet('qa')">Q&A</a>
+  <a href="#" onclick="loadSheet('dua')">Dua</a>
+  <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  <a href="#" onclick="loadSheet('hajj')">Hajj</a>
+</div>
+
+<div id="posts"></div>
+
+<div id="detailContainer" class="hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  // --- Google Sheet URLs ---
+  const sheets = {
+    qa: "https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json",
+    dua: "https://docs.google.com/spreadsheets/d/1DtRlkaP23ihYmN8mn4Gx7deLicpVhDY6AiY-bN5pqt8/gviz/tq?tqx=out:json",
+    rabbana: "https://docs.google.com/spreadsheets/d/YOUR_RABBANA_SHEET_ID/gviz/tq?tqx=out:json",
+    hajj: "https://docs.google.com/spreadsheets/d/YOUR_HAJJ_SHEET_ID/gviz/tq?tqx=out:json"
+  };
+
+  const themeColors = {
+    qa: "#ffe0b2",
+    dua: "#e8f5e9",
+    rabbana: "#e3f2fd",
+    hajj: "#fff3e0"
+  };
+
+  /**
+   * Function to make URLs clickable in text
+   */
+  function makeLinksClickable(text) {
+    if (!text) return "";
+    // Only target general URLs, not specific YouTube links which are handled by embedding
+    const urlRegex = /(?<!src=["'])(https?:\/\/[^\s"]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+  }
+  
+  /**
+   * Function to extract YouTube video ID and create embed code
+   */
+  function getYoutubeEmbed(link) {
+    if (!link || !link.includes("youtube.com")) return "";
+    try {
+      // Handles both watch?v= and short forms like youtu.be/
+      let videoId = link.split('v=')[1]?.split('&')[0];
+      if (!videoId) {
+          videoId = link.split('youtu.be/')[1]?.split('?')[0];
+      }
+      
+      if(videoId) {
+          // Use 'embed' for the iframe source
+          return `<div class="youtube-embed"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+      }
+      return "";
+    } catch(e) {
+      console.error("YouTube link parsing failed:", e);
+      return "";
+    }
+  }
+
+
+  // --- Load sheet and render posts ---
+  async function loadSheet(type='qa') {
+    document.body.style.background = themeColors[type] || "#f7f7f7";
+    const sheetUrl = sheets[type];
+    if(!sheetUrl) return alert("Sheet URL missing!");
+    document.getElementById('posts').innerHTML = "<p style='text-align:center'>⏳ Loading...</p>";
+
+    try {
+      const res = await fetch(sheetUrl);
+      const text = await res.text();
+      // ⚠️ Use same parsing logic as the First Code for consistency
+      const json = JSON.parse(text.substr(47).slice(0, -2)); 
+      const rows = json.table.rows;
+
+      // ⚠️ Use same mapping logic as the First Code
+      const posts = rows.map((r, i) => {
+        let rawDate = r.c[5]?.v || "";
+        
+        // 🩵 Google Sheet date cleanup logic from First Code
+        if (/Date\(\d+,\d+,\d+\)/.test(rawDate)) {
+          const match = rawDate.match(/Date\((\d+),(\d+),(\d+)\)/);
+          if (match) {
+            const year = match[1];
+            // Months in JS Date object are 0-indexed, so we add 1
+            const month = String(parseInt(match[2]) + 1).padStart(2, '0');
+            const day = String(match[3]).padStart(2, '0');
+            rawDate = `${day}/${month}/${year}`;
+          }
+        }
+
+        return {
+          id: i + 1,
+          title: r.c[0]?.v || "",
+          question: r.c[1]?.v || "",
+          answer: r.c[2]?.v || "",
+          reference: r.c[3]?.v || "",
+          link: r.c[4]?.v || "",
+          date: rawDate.trim(),
+          image: r.c[6]?.v || ""
+        };
+      }).filter(p=>p.title); // Still filter out empty titles for safety
+
+      renderPosts(posts);
+    } catch(err) {
+      document.getElementById('posts').innerHTML = "<p style='color:red; text-align:center'>❌ Error loading data.</p>";
+      console.error(err);
+    }
+  }
+
+  // --- Render homepage (titles only) ---
+  function renderPosts(posts){
+    const container = document.getElementById("posts");
+    container.innerHTML = posts.map(p=>`
+      <div class="post-card" onclick="openPost(${p.id})">
+        <h3>${p.title}</h3>
+      </div>
+    `).join('');
+    window.allPosts = posts;
+    document.getElementById("posts").classList.remove("hidden");
+    document.getElementById("detailContainer").classList.add("hidden");
+  }
+
+  // --- Open detail card ---
+  function openPost(id){
+    const p = window.allPosts.find(x=>x.id===id);
+    const d = document.getElementById("detailContainer");
+
+    // 🆕 Use the function to get YouTube embed code
+    const youtubeEmbed = getYoutubeEmbed(p.link);
+    // If a YouTube embed is created, we will not show the link in the link field
+    const displayLink = youtubeEmbed ? "" : (p.link ? `<p><b>Link:</b> <a href="${p.link}" target="_blank">🔗 View Source</a></p>` : "");
+
+    d.innerHTML = `
+      <div class="card" id="detailCard">
+        <h3>${p.title}</h3>
+        <p><b>Q:</b> ${p.question || "—"}</p>
+        <p><b>A:</b> ${makeLinksClickable(p.answer) || "—"}</p>
+        <p><i><b>Reference:</b> ${makeLinksClickable(p.reference) || "—"}</i></p>
+        ${youtubeEmbed} 
+        ${displayLink}
+        <p><b>Last Update:</b> ${p.date || "—"}</p>
+        ${p.image ? `<p><b>Image:</b><br><img src="${p.image}" style="max-width:100%; border-radius:10px;"></p>` : ""}
+        
+        <div>
+          <button class="back-btn" onclick="goBack()">⬅ Back</button>
+          <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+          <button class="share-btn" onclick='shareAsImage(${encodeURIComponent(JSON.stringify(p))})'>📤 Share</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("posts").classList.add("hidden");
+    d.classList.remove("hidden");
+  }
+
+  // --- Back to homepage ---
+  function goBack(){
+    document.getElementById("detailContainer").classList.add("hidden");
+    document.getElementById("posts").classList.remove("hidden");
+  }
+
+  // --- Gradient background for detail card ---
+  function changeColor(){
+    const card = document.getElementById("detailCard");
+    const gradients = [
+      "linear-gradient(135deg,#ffecd2,#fcb69f)",
+      "linear-gradient(135deg,#a1c4fd,#c2e9fb)",
+      "linear-gradient(135deg,#fddb92,#d1fdff)",
+      "linear-gradient(135deg,#84fab0,#8fd3f4)",
+      "linear-gradient(135deg,#fccb90,#d57eeb)",
+      "linear-gradient(135deg,#e0c3fc,#8ec5fc)"
+    ];
+    card.style.background = gradients[Math.floor(Math.random()*gradients.length)];
+  }
+
+  // --- Share card as image ---
+  async function shareAsImage(post){
+    const card = document.getElementById("detailCard");
+    const buttons = card.querySelectorAll("button");
+    buttons.forEach(b=>b.style.display="none");
+
+    const canvas = await html2canvas(card);
+    buttons.forEach(b=>b.style.display="");
+
+    canvas.toBlob(blob=>{
+      const file = new File([blob],"question.png",{type:"image/png"});
+      if(navigator.share){
+        navigator.share({
+          title: post.title,
+          text: post.answer || "",
+          url: window.location.href,
+          files: [file]
+        }).catch(()=>alert("Share canceled or failed"));
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'question.png';
+        a.click();
+      }
+    });
+  }
+
+  // --- Load default sheet ---
+  loadSheet('qa');
+
+  // --- PWA Service Worker ---
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(()=>console.log("✅ PWA active"))
+      .catch(err=>console.error("SW failed:",err));
+  }
+</script>
+</body>
+</html>
