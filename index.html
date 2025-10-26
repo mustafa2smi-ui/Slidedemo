@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Darul Islam Q&A | Authentic Islamic Questions, Answers & Fiqh</title>
+<meta name="description" content="Find authentic Islamic Questions and Answers (Q&A), Fiqh Rulings, Duas, and Hajj guides based on trusted references. Darul Islam’s reliable knowledge hub.">
+<meta name="keywords" content="islamic q&a, fiqh, islamic questions and answers, dua, rabbana, hajj guide, authentic islamic rulings, sunnah, hadith">
+<meta property="og:title" content="Darul Islam Q&A" />
+<meta property="og:description" content="Authentic Islamic Questions and Answers." />
+<meta property="og:image" content="icon-512.png" />
+<meta property="og:url" content="https://YOUR-NETLIFY-URL.netlify.app" />
+<link rel="manifest" href="manifest.json" />
+<style>
+  body {font-family: sans-serif; background:#f9f9f9; margin:0; padding:0;}
+  header {background:#004d40; color:white; padding:15px; text-align:center;}
+  .card, .post-card {
+    background:white; margin:15px; padding:15px; border-radius:12px; 
+    box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;
+  }
+  
+  .card img {
+      max-width:100%; 
+      height: auto; 
+      display: block; 
+      border-radius:10px; 
+      margin-top:8px;
+  }
+  
+  /* Buttons styling */
+  .share-btn, .img-share-btn, .color-btn, .back-btn {border:none; padding:8px 15px; border-radius:8px; cursor:pointer; margin-top:10px;}
+  .share-btn {background:#00897b; color:white;}
+  .img-share-btn {background:#4caf50; color:white;}
+  .color-btn {background:#ff9800; color:white;}
+  .back-btn {background:#607d8b; color:white;}
+  
+  /* 🆕 New Menu Styling (Responsive, Wrap, Border) */
+  .menu {
+      background:#e0f2f1; /* Light background for border effect */
+      display: flex;
+      flex-wrap: wrap; /* Items ko next line mein bhej dega agar space kam ho */
+      justify-content: center; /* Items ko beech mein rakhega */
+      padding: 5px; 
+      gap: 8px; /* Items ke beech mein thoda gap */
+  }
+  .menu a {
+      color: #004d40; /* Dark text color */
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 15px; /* Padding for button look */
+      border: 2px solid #004d40; /* Dark Green Border */
+      border-radius: 20px; /* Rounded corners */
+      transition: background 0.3s;
+      white-space: nowrap; /* Items ko ek hi line mein rakhega */
+  }
+  .menu a:hover {
+      background: #004d40; /* Hover effect: Dark background */
+      color: white; /* Hover effect: White text */
+  }
+  
+  .hidden {display:none;}
+  
+  /* YouTube Embed Styling */
+  .youtube-embed { 
+      margin-top: 15px; 
+      margin-bottom: 15px; 
+      position: relative; 
+      width: 100%; 
+      height: 0; 
+      padding-bottom: 56.25%; 
+      overflow: hidden;
+  }
+  .youtube-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px; 
+  }
+
+  a { color: #0077cc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Style for content separation without labels */
+  .content-section { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+  .content-section:last-of-type { border-bottom: none; }
+  h3 { margin-top: 0; margin-bottom: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h2>Darul Islam Q&A</h2>
+</header>
+
+<div class="menu">
+  <a href="#" onclick="loadSheet('qa')">Q&A</a>
+  <a href="#" onclick="loadSheet('dua')">Dua</a>
+  <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  <a href="#" onclick="loadSheet('hajj')">Hajj</a>
+  <a href="#" onclick="loadSheet('fiqh')">Fiqh</a>
+  <a href="#" onclick="loadSheet('aqidah')">Aqidah</a>
+</div>
+
+<div id="posts"></div>
+
+<div id="detailContainer" class="hidden"></div>
+
+<script id="schema-data" type="application/ld+json"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  let allPosts = []; 
+  const POSTS_PER_PAGE = 5; // 🆕 Sirf 5 post pehle dikhenge
+  let currentVisiblePosts = 0; // Kitne posts abhi dikh rahe hain
+  const defaultTitle = "Darul Islam Q&A | Authentic Islamic Questions, Answers & Fiqh";
+  const defaultDescription = "Find authentic Islamic Questions and Answers (Q&A), Fiqh Rulings, Duas, and Hajj guides based on trusted references. Darul Islam’s reliable knowledge hub.";
+    
+  // --- Google Sheet URLs ---
+  const sheets = {
+    qa: "https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json",
+    dua: "https://docs.google.com/spreadsheets/d/1DtRlkaP23ihYmN8mn4Gx7deLicpVhDY6AiY-bN5pqt8/gviz/tq?tqx=out:json",
+    rabbana: "https://docs.google.com/spreadsheets/d/YOUR_RABBANA_SHEET_ID/gviz/tq?tqx=out:json",
+    hajj: "https://docs.google.com/spreadsheets/d/YOUR_HAJJ_SHEET_ID/gviz/tq?tqx=out:json",
+    // 🆕 Add new sheet URLs here (agar aapne naye menu items jode hain to)
+    fiqh: "https://docs.google.com/spreadsheets/d/YOUR_FIQH_SHEET_ID/gviz/tq?tqx=out:json", 
+    aqidah: "https://docs.google.com/spreadsheets/d/YOUR_AQIDAH_SHEET_ID/gviz/tq?tqx=out:json" 
+  };
+
+  const themeColors = {
+    qa: "#ffe0b2",
+    dua: "#e8f5e9",
+    rabbana: "#e3f2fd",
+    hajj: "#fff3e0",
+    fiqh: "#f3e5f5", // Example new color
+    aqidah: "#e1f5fe" // Example new color
+  };
+
+  function makeLinksClickable(text) {
+    if (!text) return "";
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+  }
+  
+  function getYoutubeEmbed(link) {
+    if (!link) return "";
+    
+    let videoId = "";
+    
+    if (link.includes("youtube.com/watch?v=")) {
+      videoId = link.split("v=")[1]?.split("&")[0];
+    } else if (link.includes("youtube.com/shorts/")) {
+      videoId = link.split("youtube.com/shorts/")[1]?.split("?")[0];
+    } else if (link.includes("youtu.be/")) {
+      videoId = link.split("youtu.be/")[1]?.split("?")[0];
+    } else if (link.includes("youtube.com/embed/")) {
+        videoId = link.split("youtube.com/embed/")[1]?.split("?")[0];
+    }
+    
+    if(videoId && videoId.length >= 10) { 
+        return `<div class="youtube-embed"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    }
+    return "";
+  }
+  
+  async function loadSheet(type='qa') {
+    document.body.style.background = themeColors[type] || "#f7f7f7";
+    const sheetUrl = sheets[type];
+    if(!sheetUrl) {
+      document.getElementById('posts').innerHTML = `<p style='color:red; text-align:center'>❌ Sheet URL missing for ${type.toUpperCase()}!</p>`;
+      return;
+    }
+    
+    document.getElementById('posts').innerHTML = "<p style='text-align:center'>⏳ Loading...</p>";
+
+    try {
+      const res = await fetch(sheetUrl);
+      const text = await res.text();
+      const json = JSON.parse(text.substr(47).slice(0, -2)); 
+      const rows = json.table.rows;
+
+      const posts = rows.map((r, i) => {
+        let rawDate = r.c[5]?.v || "";
+        
+        if (/Date\(\d+,\d+,\d+\)/.test(rawDate)) {
+          const match = rawDate.match(/Date\((\d+),(\d+),(\d+)\)/);
+          if (match) {
+            const year = match[1];
+            const month = String(parseInt(match[2]) + 1).padStart(2, '0');
+            const day = String(match[3]).padStart(2, '0');
+            rawDate = `${day}/${month}/${year}`;
+          }
+        }
+
+        return {
+          id: i + 1,
+          title: r.c[0]?.v || "",
+          question: r.c[1]?.v || "",
+          answer: r.c[2]?.v || "",
+          reference: r.c[3]?.v || "",
+          link: r.c[4]?.v || "",
+          date: rawDate.trim(),
+          image: r.c[6]?.v || ""
+        };
+      }).filter(p=>p.title); 
+
+      allPosts = posts; 
+      renderPosts(posts); // 🆕 Ab renderPosts ko 'allPosts' ki zaroorat nahi, woh post count handle karega.
+
+      // Default SEO tags set karein
+      document.title = defaultTitle;
+      document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
+      document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
+      document.querySelector('meta[property="og:description"]').setAttribute("content", "Authentic Islamic Questions and Answers.");
+      document.getElementById('schema-data').textContent = ''; 
+
+    } catch(err) {
+      document.getElementById('posts').innerHTML = "<p style='color:red; text-align:center'>❌ Error loading data. Please check Google Sheet URL format.</p>";
+      console.error(err);
+    }
+  }
+
+function renderPosts(posts){
+    const container = document.getElementById("posts");
+    
+    // 🆕 Reset visible posts count
+    currentVisiblePosts = Math.min(posts.length, POSTS_PER_PAGE);
+    
+    // Sirf utne posts map karein jitne dikhane hain
+    const visiblePosts = posts.slice(0, currentVisiblePosts);
+
+    let html = visiblePosts.map(p=>{
+        return `
+            <div class="post-card" onclick="openPost(${p.id})">
+                <h3>${p.title}</h3>
+            </div>
+        `;
+    }).join('');
+    
+    // Agar zyada posts hain to Show More button jodein
+    if (posts.length > POSTS_PER_PAGE) {
+        html += `<div style="text-align:center; padding-bottom:15px;"><button id="showMoreBtn" class="share-btn" onclick="showMorePosts()">Show More (${posts.length - currentVisiblePosts} remaining)</button></div>`;
+    }
+
+    container.innerHTML = html;
+    document.getElementById("posts").classList.remove("hidden");
+    document.getElementById("detailContainer").classList.add("hidden");
+}
+
+// 🆕 New function to load more posts
+function showMorePosts() {
+    const container = document.getElementById("posts");
+    const posts = allPosts; 
+    
+    const nextBatchSize = 5; 
+    const newEndIndex = Math.min(posts.length, currentVisiblePosts + nextBatchSize);
+
+    // Naye posts ka HTML generate karein
+    const newPostsHtml = posts.slice(currentVisiblePosts, newEndIndex).map(p => `
+        <div class="post-card" onclick="openPost(${p.id})">
+            <h3>${p.title}</h3>
+        </div>
+    `).join('');
+
+    // Naye posts ko 'showMoreBtn' se pehle insert karein
+    const showMoreBtn = document.getElementById("showMoreBtn");
+    if (showMoreBtn) {
+        showMoreBtn.parentElement.insertAdjacentHTML('beforebegin', newPostsHtml);
+    } else {
+        container.insertAdjacentHTML('beforeend', newPostsHtml); // Fallback
+    }
+    
+    // Current count update karein
+    currentVisiblePosts = newEndIndex;
+
+    const remaining = posts.length - currentVisiblePosts;
+
+    if (remaining > 0) {
+        // Button text update karein
+        showMoreBtn.textContent = `Show More (${remaining} remaining)`;
+    } else if (showMoreBtn) {
+        // Agar saare posts load ho gaye to button hata dein
+        showMoreBtn.parentElement.remove(); // Button aur div ko hatana
+    }
+}
+
+
+  // --- Open detail card ---
+  function openPost(id){
+    const p = allPosts.find(x=>x.id===id); 
+    if (!p) return; 
+    
+    // 📢 START: DYNAMIC SEO UPDATE
+    
+    document.title = `${p.title} | Darul Islam Q&A`;
+
+    const postDescription = p.question ? p.question.substring(0, 150) + (p.question.length > 150 ? "..." : "") : "Authentic Islamic Q&A Post.";
+    document.querySelector('meta[name="description"]').setAttribute("content", postDescription);
+    document.querySelector('meta[property="og:title"]').setAttribute("content", p.title);
+    document.querySelector('meta[property="og:description"]').setAttribute("content", postDescription);
+
+    const schemaElement = document.getElementById('schema-data');
+    if (p.question && p.answer) {
+        const schema = {
+            "@context": "https://schema.org",
+            "@type": "QAPage",
+            "mainEntity": {
+                "@type": "Question",
+                "name": p.title, 
+                "text": p.question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": p.answer,
+                    "url": window.location.href 
+                }
+            }
+        };
+        schemaElement.textContent = JSON.stringify(schema);
+    } else {
+        schemaElement.textContent = ''; 
+    }
+    
+    // 📢 END: DYNAMIC SEO UPDATE
+    
+    const d = document.getElementById("detailContainer");
+    const youtubeEmbed = getYoutubeEmbed(p.link);
+    const isYoutubeLink = p.link && (p.link.includes("youtube.com") || p.link.includes("youtu.be"));
+    const displayLink = (!youtubeEmbed && !isYoutubeLink && p.link) ? 
+        `<div class="content-section"><a href="${p.link}" target="_blank">🔗 View Source</a></div>` : "";
+
+
+    d.innerHTML = `
+      <div class="card" id="detailCard">
+        
+        <h3>${p.title}</h3> 
+        
+        ${p.question ? `<div class="content-section">${p.question}</div>` : ""} 
+        
+        ${p.answer ? `<div class="content-section">${makeLinksClickable(p.answer)}</div>` : ""}
+        
+        ${p.reference ? `<div class="content-section"><i>${makeLinksClickable(p.reference)}</i></div>` : ""}
+        
+        ${youtubeEmbed} 
+        
+        ${displayLink}
+        
+        ${p.image ? `<img src="${p.image}" style="max-width:100%; height:auto; border-radius:10px; margin-top:10px; display:block;">` : ""}
+        
+        <p style="font-size:0.8em; color:#777; margin-top:10px;">${p.date || "—"}</p>
+        
+        <div>
+          <button class="back-btn" onclick="goBack()">⬅ Back</button>
+          <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+          <button class="share-btn" onclick='shareAsImage(${p.id})'>📤 Share</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("posts").classList.add("hidden");
+    d.classList.remove("hidden");
+  }
+
+  function goBack(){
+    document.getElementById("detailContainer").classList.add("hidden");
+    document.getElementById("posts").classList.remove("hidden");
+    
+    // Default SEO tags wapas set karein.
+    document.title = defaultTitle;
+    document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
+    document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
+    document.querySelector('meta[property="og:description"]').setAttribute("content", "Authentic Islamic Questions and Answers.");
+    document.getElementById('schema-data').textContent = ''; 
+  }
+
+  function changeColor(){
+    const card = document.getElementById("detailCard");
+    const gradients = [
+      "linear-gradient(135deg,#ffecd2,#fcb69f)",
+      "linear-gradient(135deg,#a1c4fd,#c2e9fb)",
+      "linear-gradient(135deg,#fddb92,#d1fdff)",
+      "linear-gradient(135deg,#84fab0,#8fd3f4)",
+      "linear-gradient(135deg,#fccb90,#d57eeb)",
+      "linear-gradient(135deg,#e0c3fc,#8ec5fc)"
+    ];
+    card.style.background = gradients[Math.floor(Math.random()*gradients.length)];
+  }
+
+  async function shareAsImage(id) {
+    const p = allPosts.find(x => x.id === id); 
+    if (!p) return alert("Share data not found.");
+
+    const card = document.getElementById("detailCard");
+    
+    // 1. YouTube Frame ko Chhipana
+    const youtubeFrame = card.querySelector('.youtube-embed');
+    if (youtubeFrame) {
+        youtubeFrame.style.display = 'none';
+    }
+
+    const shareData = {
+        title: p.title || "DarulIslam Q&A",
+        // 🆕 Custom share message
+        text: `${p.question || p.title}\n\nAur Aise hi Islamic Masail Ko janne Ke liye Website Par visit kare`,
+        url: window.location.href, 
+    };
+    
+    // Hide buttons before capture
+    const buttons = card.querySelectorAll("button");
+    buttons.forEach(b => b.style.display = "none"); 
+    
+    // html2canvas takes screenshot
+    const canvas = await html2canvas(card, {
+        allowTaint: true, 
+        useCORS: true, 
+        logging: false 
+    });
+    
+    // 2. YouTube Frame ko Wapas Dikhana
+    if (youtubeFrame) {
+        youtubeFrame.style.display = ''; 
+    }
+    
+    // Show buttons after capture
+    buttons.forEach(b => b.style.display = ""); 
+    
+    canvas.toBlob(blob => {
+      const file = new File([blob], "question.png", { type: "image/png" });
+      if (navigator.share) {
+        navigator.share({
+          ...shareData, 
+          files: [file]
+        }).catch(e=>console.error("Card Share canceled or failed:", e));
+      } else {
+        // Fallback: Download image
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'question.png';
+        a.click();
+      }
+    }, 'image/png'); 
+  }
+
+  // --- Load default sheet ---
+  loadSheet('qa');
+
+  // --- PWA Service Worker (Kept as is) ---
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(()=>console.log("✅ PWA active"))
+      .catch(err=>console.error("SW failed:",err));
+  }
+</script>
+</body>
+</html>
