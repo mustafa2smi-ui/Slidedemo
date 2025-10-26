@@ -104,11 +104,156 @@
   .content-section { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
   .content-section:last-of-type { border-bottom: none; }
   h3 { margin-top: 0; margin-bottom: 10px; }
+/* --------------------------------- */
+/* 🆕 DARK MODE AND THEME VARIABLES */
+/* --------------------------------- */
+:root {
+  --bg: #f9f9f9; /* Light background */
+  --text: #111; /* Dark text */
+  --card: #ffffff; /* Card background in light mode */
+  --accent: #004d40; /* Your primary green (Header/Footer/Buttons) */
+  --accent-light: #00897b; /* Share Button */
+  --secondary-bg: #e0f2f1; /* Menu background */
+}
 
+body.dark {
+  --bg: #121212;
+  --text: #eee;
+  --card: #1e1e1e;
+  --accent: #2ecc71; /* Dark mode green accent */
+  --accent-light: #258f50;
+  --secondary-bg: #333333;
+}
+
+body {
+  /* Existing styles */
+  background: var(--bg);
+  color: var(--text);
+  transition: all 0.4s ease; /* Smooth transition for dark mode */
+}
+
+/* --------------------------------- */
+/* 🆕 HEADER AND FOOTER STYLING (Green) */
+/* --------------------------------- */
+header {
+  background: var(--accent); /* Dark Green */
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+}
+
+header h2 { /* Aapke existing h2 ko h1 se change karein ya use karein */
+  margin: 0;
+}
+
+#themeToggle {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background: var(--accent); /* Dark Green */
+  color: #fff;
+}
+
+/* Update Button styles to use new variables */
+.share-btn {background: var(--accent-light); color:white;}
+.back-btn {background:#607d8b; color:white;}
+.color-btn {background:#ff9800; color:white;}
+
+
+/* --------------------------------- */
+/* 🆕 NAMAZ/LOCATION/DISCLAIMER BOX STYLES */
+/* --------------------------------- */
+.info-box {
+  margin: 10px auto;
+  padding: 10px 14px;
+  max-width: 90%;
+  border: 2px solid var(--card); /* Adjust border color */
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  font-size: 15px;
+  color: var(--text);
+  text-align: center;
+  transition: 0.3s;
+}
+.info-box:hover {
+  background: var(--secondary-bg);
+  transform: scale(1.02);
+}
+
+.disclaimer {
+  background: #fff8e1;
+  border-color: #fbbf24;
+  color: #854d0e;
+}
+body.dark .disclaimer {
+   background: #3c2e00; 
+   border-color: #fbbf24;
+   color: #e0d0a0;
+}
+
+.namaz-times {
+  margin: 10px auto;
+  padding: 15px;
+  text-align: center;
+  background: linear-gradient(90deg, var(--accent), #00796b); /* Green gradient */
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  max-width: 90%;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.namaz-times h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #e0f2f1; /* Light color for heading */
+}
+.namaz-times ul li {
+    text-align: left;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.namaz-times ul li:last-child {
+    border-bottom: none;
+}
+  
 </style>
 </head>
 <body>
+<header>
+  <h1>🕌 Darul Islam Q&A</h1>
+  <button id="themeToggle">🌙</button>
+</header>
+<div class="menu">
+  <a href="#" onclick="loadSheet('qa')">Q&A</a>
+  <a href="#" onclick="loadSheet('dua')">Dua</a>
+  <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  <a href="#" onclick="loadSheet('hajj')">Hajj</a>
+  <a href="#" onclick="loadSheet('fiqh')">Fiqh</a>
+  <a href="#" onclick="loadSheet('aqidah')">Aqidah</a>
+</div>
+<div id="locationBox" class="info-box" style="cursor: pointer;" onclick="useMyLocation()">
+  📍 <span id="locationText">Detecting your location...</span>
+</div>
 
+<div id="namazTimes" class="namaz-times">
+  🕋 Loading Namaz Times...
+</div>
+
+<div id="disclaimerBox" class="info-box disclaimer">
+  ⚠️ <b>Disclaimer:</b> Salah timings may vary slightly depending on your local Masjid or calculation method.
+</div>
+
+  <!--
 <header>
   <h2>Darul Islam Q&A</h2>
 </header>
@@ -121,7 +266,7 @@
   <a href="#" onclick="loadSheet('fiqh')">Fiqh</a>
   <a href="#" onclick="loadSheet('aqidah')">Aqidah</a>
 </div>
-
+-->
 <div id="posts"></div>
 
 <div id="detailContainer" class="hidden"></div>
@@ -182,6 +327,29 @@
     }
     return "";
   }
+  // ===============================================
+// 🌙 DARK/LIGHT MODE LOGIC
+// ===============================================
+
+const themeBtn = document.getElementById('themeToggle');
+if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        themeBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Check saved theme on load
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+        themeBtn.textContent = '☀️';
+    } else {
+        themeBtn.textContent = '🌙';
+    }
+}
+// ===============================================
+// 🌙 END OF DARK/LIGHT MODE LOGIC
+// ===============================================
   
   async function loadSheet(type='qa') {
     document.body.style.background = themeColors[type] || "#f7f7f7";
@@ -482,7 +650,112 @@ function showMorePosts() {
         prompt("Copy this text:", `${shareData.title}\n\n${postContent}\n\n${shareData.text}\n\n${shareData.url}`);
     }
   }
+// ===============================================
+// 🕌 NAMAZ TIME AND LOCATION FUNCTIONS
+// ===============================================
 
+// 🧭 Convert 24-hour → 12-hour format
+function convertTo12Hour(time24) {
+  let [hours, minutes] = time24.split(":");
+  hours = parseInt(hours);
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+// 🗺 Show human readable location (OpenStreetMap)
+async function showAddress(lat, lng) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const data = await res.json();
+    document.getElementById("locationText").innerText = `📍 ${data.display_name}`;
+  } catch {
+    document.getElementById("locationText").innerText = `📍 Latitude: ${lat.toFixed(2)}, Longitude: ${lng.toFixed(2)}`;
+  }
+}
+
+// 🌙 Fetch Namaz times from API
+async function fetchPrayerTimes(lat, lng, cityName = "Delhi") {
+  try {
+    // Save current location to local storage
+    localStorage.setItem('prayerLat', lat);
+    localStorage.setItem('prayerLng', lng);
+    localStorage.setItem('prayerCity', cityName);
+
+    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=2`);
+    const data = await res.json();
+    const t = data.data.timings;
+
+    const prayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+    let listHTML = `
+      <h3>🕌 Salah Times - ${cityName}</h3>
+      <ul style="list-style:none;padding:0;margin:5px 0;">
+    `;
+
+    prayerNames.forEach(name => {
+      const time12 = convertTo12Hour(t[name]);
+      // Highlight the next prayer here if needed
+      listHTML += `<li><b>${name}:</b> ${time12}</li>`;
+    });
+
+    listHTML += `
+      </ul>
+      <button onclick="useMyLocation()" 
+        style="background:#198754;color:#fff;border:none;padding:6px 12px;
+        border-radius:6px;cursor:pointer;margin-top:10px;">📍 Use My Current Location</button>
+    `;
+
+    document.getElementById("namazTimes").innerHTML = listHTML;
+
+    // Show human readable address
+    showAddress(lat, lng);
+  } catch (e) {
+    console.error(e);
+    document.getElementById("namazTimes").textContent = "Error fetching Salah times.";
+  }
+}
+
+// 📍 Detect user location or fallback to saved/Delhi location
+function useMyLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        fetchPrayerTimes(lat, lng, "Your Current Location");
+      },
+      () => {
+        alert("Location permission denied! Using saved location or Delhi as default.");
+        loadInitialPrayerTimes(); // Revert to saved/default
+      }
+    );
+  } else {
+    alert("Geolocation not supported on this device.");
+    loadInitialPrayerTimes(); // Revert to saved/default
+  }
+}
+
+// 🔹 Initial Load Function: Saved Location Priority
+function loadInitialPrayerTimes() {
+    const savedLat = localStorage.getItem('prayerLat');
+    const savedLng = localStorage.getItem('prayerLng');
+    const savedCity = localStorage.getItem('prayerCity');
+
+    if (savedLat && savedLng) {
+        // Use saved location
+        fetchPrayerTimes(savedLat, savedLng, savedCity || "Saved Location");
+    } else {
+        // Default to Delhi
+        fetchPrayerTimes(28.6139, 77.2090, "Delhi (Default)");
+    }
+}
+
+// 🔹 Run on page load
+window.addEventListener("load", loadInitialPrayerTimes);
+// ===============================================
+// 🕌 END OF NAMAZ TIME AND LOCATION FUNCTIONS
+// ===============================================
+  
   // --- Load default sheet ---
   loadSheet('qa');
 
@@ -493,5 +766,9 @@ function showMorePosts() {
       .catch(err=>console.error("SW failed:",err));
   }
 </script>
+  <footer>
+  <p>© 2025 Darul Islam Q&A | Authentic Islamic Knowledge</p>
+  </footer>
+  
 </body>
 </html>
