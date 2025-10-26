@@ -15,17 +15,39 @@
   header {background:#004d40; color:white; padding:15px; text-align:center;}
   .card, .post-card {background:white; margin:15px; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;}
   .card img {max-width:100%; border-radius:10px; margin-top:8px;}
+  /* Buttons styling (kept same as your second code) */
   .share-btn, .img-share-btn, .color-btn, .back-btn {border:none; padding:8px 15px; border-radius:8px; cursor:pointer; margin-top:10px;}
   .share-btn {background:#00897b; color:white;}
   .img-share-btn {background:#4caf50; color:white;}
   .color-btn {background:#ff9800; color:white;}
   .back-btn {background:#607d8b; color:white;}
+  
   .menu {background:#004d40; color:white; display:flex; justify-content:space-around; padding:10px;}
   .menu a {color:white; text-decoration:none; font-weight:bold;}
   .hidden {display:none;}
+  
+  /* YouTube Embed Styling */
+  .youtube-embed { 
+      margin-top: 15px; 
+      margin-bottom: 15px; 
+      /* Ensures iframe fits well */
+      position: relative; 
+      width: 100%; 
+      height: 0; 
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      overflow: hidden;
+  }
+  .youtube-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px; /* Optional: adds rounded corners to the video */
+  }
 
-  /* 🆕 YouTube Embed Styling */
-  .youtube-embed { margin-top: 15px; margin-bottom: 15px; }
+  a { color: #0077cc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -76,7 +98,7 @@
    * Function to extract YouTube video ID and create embed code
    */
   function getYoutubeEmbed(link) {
-    if (!link || !link.includes("youtube.com")) return "";
+    if (!link || !link.includes("youtube.com") && !link.includes("youtu.be")) return "";
     try {
       // Handles both watch?v= and short forms like youtu.be/
       let videoId = link.split('v=')[1]?.split('&')[0];
@@ -86,7 +108,8 @@
       
       if(videoId) {
           // Use 'embed' for the iframe source
-          return `<div class="youtube-embed"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+          // Added video wrapper class for responsive design
+          return `<div class="youtube-embed"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
       }
       return "";
     } catch(e) {
@@ -106,11 +129,11 @@
     try {
       const res = await fetch(sheetUrl);
       const text = await res.text();
-      // ⚠️ Use same parsing logic as the First Code for consistency
+      // Use same parsing logic as the First Code
       const json = JSON.parse(text.substr(47).slice(0, -2)); 
       const rows = json.table.rows;
 
-      // ⚠️ Use same mapping logic as the First Code
+      // Use same mapping logic as the First Code (no rows.slice(1))
       const posts = rows.map((r, i) => {
         let rawDate = r.c[5]?.v || "";
         
@@ -163,10 +186,10 @@
     const p = window.allPosts.find(x=>x.id===id);
     const d = document.getElementById("detailContainer");
 
-    // 🆕 Use the function to get YouTube embed code
     const youtubeEmbed = getYoutubeEmbed(p.link);
-    // If a YouTube embed is created, we will not show the link in the link field
-    const displayLink = youtubeEmbed ? "" : (p.link ? `<p><b>Link:</b> <a href="${p.link}" target="_blank">🔗 View Source</a></p>` : "");
+    // If a YouTube embed is created, we will only show 'Link' if it's NOT a YouTube link
+    const displayLink = (!youtubeEmbed && p.link) ? 
+        `<p><b>Link:</b> <a href="${p.link}" target="_blank">🔗 View Source</a></p>` : "";
 
     d.innerHTML = `
       <div class="card" id="detailCard">
@@ -182,7 +205,7 @@
         <div>
           <button class="back-btn" onclick="goBack()">⬅ Back</button>
           <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
-          <button class="share-btn" onclick='shareAsImage(${encodeURIComponent(JSON.stringify(p))})'>📤 Share</button>
+          <button class="share-btn" onclick='shareAsImage(${p.id})'>📤 Share</button>
         </div>
       </div>
     `;
@@ -210,31 +233,52 @@
     card.style.background = gradients[Math.floor(Math.random()*gradients.length)];
   }
 
-  // --- Share card as image ---
-  async function shareAsImage(post){
-    const card = document.getElementById("detailCard");
-    const buttons = card.querySelectorAll("button");
-    buttons.forEach(b=>b.style.display="none");
-
-    const canvas = await html2canvas(card);
-    buttons.forEach(b=>b.style.display="");
-
-    canvas.toBlob(blob=>{
-      const file = new File([blob],"question.png",{type:"image/png"});
-      if(navigator.share){
+  // 1️⃣ SHARE IMAGE FUNCTION (REPLACED WITH FIRST CODE'S LOGIC)
+  async function shareAsImage(id) {
+    const p = window.allPosts.find(x => x.id === id);
+    if(p.image) {
+      // Share only the image
+      const res = await fetch(p.image);
+      const blob = await res.blob();
+      const file = new File([blob], "question-image.png", {type: blob.type});
+      if(navigator.share) {
         navigator.share({
-          title: post.title,
-          text: post.answer || "",
-          url: window.location.href,
+          title: p.title,
+          text: "Check out this question from DarulIslam",
           files: [file]
         }).catch(()=>alert("Share canceled or failed"));
       } else {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'question.png';
-        a.click();
+        alert("Your browser does not support image sharing");
       }
-    });
+    } else {
+      // Share card as image
+      const card = document.getElementById("detailCard");
+      // Hide buttons before capture
+      const buttons = card.querySelectorAll("button");
+      buttons.forEach(b => b.style.display = "none"); 
+      
+      const canvas = await html2canvas(card);
+      
+      // Show buttons after capture
+      buttons.forEach(b => b.style.display = ""); 
+      
+      canvas.toBlob(blob => {
+        const file = new File([blob], "question.png", { type: "image/png" });
+        if (navigator.share) {
+          navigator.share({
+            title: p.title,
+            text: "Check out this question from DarulIslam",
+            files: [file]
+          }).catch(() => alert("Share canceled or failed"));
+        } else {
+          // Fallback for browsers without Web Share API
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'question.png';
+          a.click();
+        }
+      });
+    }
   }
 
   // --- Load default sheet ---
