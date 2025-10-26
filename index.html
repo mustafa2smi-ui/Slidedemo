@@ -124,7 +124,6 @@
     dua: "https://docs.google.com/spreadsheets/d/1DtRlkaP23ihYmN8mn4Gx7deLicpVhDY6AiY-bN5pqt8/gviz/tq?tqx=out:json",
     rabbana: "https://docs.google.com/spreadsheets/d/YOUR_RABBANA_SHEET_ID/gviz/tq?tqx=out:json",
     hajj: "https://docs.google.com/spreadsheets/d/YOUR_HAJJ_SHEET_ID/gviz/tq?tqx=out:json",
-    // Add new sheet URLs here
     fiqh: "https://docs.google.com/spreadsheets/d/YOUR_FIQH_SHEET_ID/gviz/tq?tqx=out:json", 
     aqidah: "https://docs.google.com/spreadsheets/d/YOUR_AQIDAH_SHEET_ID/gviz/tq?tqx=out:json" 
   };
@@ -168,7 +167,7 @@
   async function loadSheet(type='qa') {
     document.body.style.background = themeColors[type] || "#f7f7f7";
     const sheetUrl = sheets[type];
-    if(!sheetUrl || sheetUrl.includes("YOUR_")) { // Check for placeholder URLs
+    if(!sheetUrl || sheetUrl.includes("YOUR_")) { 
       document.getElementById('posts').innerHTML = `<p style='color:orange; text-align:center'>⚠️ Please replace YOUR_SHEET_ID for ${type.toUpperCase()} in the code.</p>`;
       return;
     }
@@ -341,7 +340,7 @@ function showMorePosts() {
         <div>
           <button class="back-btn" onclick="goBack()">⬅ Back</button>
           <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
-          <button class="share-btn" onclick='shareAsImage(${p.id})'>📤 Share</button>
+          <button class="share-btn" onclick='prepareShare(${p.id})'>📤 Share</button>
         </div>
       </div>
     `;
@@ -374,9 +373,30 @@ function showMorePosts() {
     card.style.background = gradients[Math.floor(Math.random()*gradients.length)];
   }
 
+  // 🆕 New logic: Share preference choice
+  function prepareShare(id) {
+    // Agar Web Share API available hai (sabse fast aur easy way)
+    if (navigator.share) {
+        // Option 1: Image ke saath share (Custom message ki guarantee nahi)
+        if (confirm("Do you want to share the content as an Image/Screenshot? \n\n(Press 'Cancel' to share as Text/Link with custom message)")) {
+             shareAsImage(id);
+        } else {
+            // Option 2: Custom message aur Link share karein (reliable custom text)
+            shareTextOnly(id);
+        }
+    } else {
+        // Agar Web Share API available nahi hai (Desktop ya puraana device)
+        shareTextOnly(id);
+        alert("Web Share API is not supported on this device. Please copy the text manually, and the image will be downloaded.");
+        shareAsImage(id); // Image download ke liye call karein
+    }
+  }
+
+
+  // 📢 FIX: Image ke saath share karna
   async function shareAsImage(id) {
     const p = allPosts.find(x => x.id === id); 
-    if (!p) return alert("Share data not found.");
+    if (!p) return;
 
     const card = document.getElementById("detailCard");
     
@@ -385,16 +405,14 @@ function showMorePosts() {
     if (youtubeFrame) {
         youtubeFrame.style.display = 'none';
     }
+    
+    const shareUrl = window.location.href;
 
-    // 🆕 FIX: Custom message ko aur URL ko text property mein forcefully shamil karna
-    const customMessage = "Aur Aise hi Islamic Masail Ko janne Ke liye Website Par visit kare";
-    const postContent = p.question || p.title;
-
+    // FIX: Image files ke saath text ko chota rakhenge
     const shareData = {
         title: p.title || "DarulIslam Q&A",
-        // Aggressive text concatenation: Title + Content + Custom Message + URL
-        text: `${p.title}\n\n${postContent}\n\n${customMessage}\n\nVisit: ${window.location.href}`,
-        url: window.location.href, 
+        text: `Check out this Islamic Q&A: ${p.title}`,
+        url: shareUrl, 
     };
     
     // Hide buttons before capture
@@ -418,7 +436,8 @@ function showMorePosts() {
     
     canvas.toBlob(blob => {
       const file = new File([blob], "question.png", { type: "image/png" });
-      if (navigator.share) {
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         navigator.share({
           ...shareData, 
           files: [file]
@@ -431,6 +450,33 @@ function showMorePosts() {
         a.click();
       }
     }, 'image/png'); 
+  }
+
+  // 🆕 New function: Sirf Custom Message Share karna (Reliable text share)
+  function shareTextOnly(id) {
+    const p = allPosts.find(x => x.id === id);
+    if (!p) return;
+    
+    const customMessage = "Aur Aise hi Islamic Masail Ko janne Ke liye Website Par visit kare";
+    const postContent = p.question || p.title;
+    const shareUrl = window.location.href;
+
+    const shareData = {
+        title: p.title || "DarulIslam Q&A",
+        // Isi format se custom message share hota hai jisme image nahi hoti
+        text: `${p.title}\n\n${postContent}\n\n${customMessage}\n\nVisit: ${shareUrl}`,
+        url: shareUrl
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData).catch(error => {
+            console.error("Sharing text failed:", error);
+            alert("Sharing failed. Please try the Image share option.");
+        });
+    } else {
+        // Desktop fallback
+        prompt("Copy this text:", shareData.text);
+    }
   }
 
   // --- Load default sheet ---
