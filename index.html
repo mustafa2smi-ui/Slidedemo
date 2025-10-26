@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Islamic Q&A, Dua, Hajj, and Fiqh solutions with authentic references.">
+  <meta property="og:title" content="Darul Islam Q&A" />
+  <meta property="og:description" content="Authentic Islamic Questions and Answers." />
+  <meta property="og:image" content="icon-512.png" />
+  <meta property="og:url" content="https://YOUR-NETLIFY-URL.netlify.app" />
+  <title>Darul Islam Q&A</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {font-family: sans-serif; background:#f9f9f9; margin:0; padding:0;}
+    header {background:#004d40; color:white; padding:15px; text-align:center;}
+    .card {background:white; margin:15px; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+    .card img {max-width:100%; border-radius:10px; margin-top:8px;}
+    .share-btn, .img-share-btn {background:#00897b; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; margin-top:10px;}
+    .img-share-btn {background:#4caf50;}
+    .menu {background:#004d40; color:white; display:flex; justify-content:space-around; padding:10px;}
+    .menu a {color:white; text-decoration:none; font-weight:bold;}
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Darul Islam Q&A</h2>
+  </header>
+
+  <!-- Simple Hamburger Menu -->
+  <div class="menu">
+    <a href="#" onclick="loadSheet('qa')">Q&A</a>
+    <a href="#" onclick="loadSheet('dua')">Dua</a>
+    <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  </div>
+
+  <div id="posts"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+  const sheets = {
+    qa: "https://docs.google.com/spreadsheets/d/YOUR_QA_SHEET_ID/gviz/tq?tqx=out:json",
+    dua: "https://docs.google.com/spreadsheets/d/YOUR_DUA_SHEET_ID/gviz/tq?tqx=out:json",
+    rabbana: "https://docs.google.com/spreadsheets/d/YOUR_RABBANA_SHEET_ID/gviz/tq?tqx=out:json"
+  };
+
+  async function loadSheet(type='qa') {
+    document.getElementById('posts').innerHTML = "<p style='text-align:center'>⏳ Loading...</p>";
+    const url = sheets[type];
+    try {
+      const res = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.substr(47).slice(0, -2));
+      const rows = json.table.rows;
+      let html = "";
+
+      rows.forEach(r=>{
+        const p = r.c.map(c=>c?c.v:"");
+        const title = p[0] || "Untitled";
+        const q = p[1] || "";
+        const a = p[2] || "";
+        const ref = p[3] || "";
+        const link = p[4] || "";
+        const date = p[5] || "";
+        const img = p[6] || "";
+
+        // YouTube embed logic
+        let embed = "";
+        if (link.includes("youtube.com/watch?v=")) {
+          const embedLink = link.replace("watch?v=", "embed/");
+          embed = `<iframe width="100%" height="200" src="${embedLink}" frameborder="0" allowfullscreen></iframe>`;
+        }
+
+        html += `
+          <div class="card">
+            <h3>${title}</h3>
+            ${q ? `<p><b>Q:</b> ${q}</p>` : ""}
+            ${a ? `<p><b>A:</b> ${a}</p>` : ""}
+            ${ref ? `<p><b>Ref:</b> ${ref}</p>` : ""}
+            ${link && !embed ? `<p><a href="${link}" target="_blank">🔗 Link</a></p>` : ""}
+            ${embed}
+            ${img ? `<img src="${img}" alt="Image">` : ""}
+            ${date ? `<p><small>📅 ${date}</small></p>` : ""}
+            <button class="img-share-btn" onclick="shareCardImage(this)">📸 Share as Image</button>
+          </div>`;
+      });
+      document.getElementById('posts').innerHTML = html;
+    } catch(err) {
+      document.getElementById('posts').innerHTML = "❌ Error loading data.";
+      console.error(err);
+    }
+  }
+
+  async function shareCardImage(btn) {
+    const card = btn.closest('.card');
+    if (!card) return;
+    try {
+      const canvas = await html2canvas(card);
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const file = new File([blob], 'qa.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: 'Islamic Q&A', text: 'Check this answer', files: [file] });
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'qa.png';
+        a.click();
+      }
+    } catch(e) {
+      alert("Cannot share: " + e.message);
+    }
+  }
+
+  // Load default sheet
+  loadSheet('qa');
+
+  // Register service worker for PWA
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(()=>console.log("✅ PWA active"))
+      .catch(err=>console.error("SW failed:", err));
+  }
+  </script>
+</body>
+</html>
