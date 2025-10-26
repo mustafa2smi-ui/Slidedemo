@@ -75,11 +75,17 @@
   <a href="#" onclick="loadSheet('dua')">Dua</a>
   <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
   <a href="#" onclick="loadSheet('hajj')">Hajj</a>
+  <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  <a href="#" onclick="loadSheet('hajj')">Hajj</a>
+  <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  <a href="#" onclick="loadSheet('hajj')">Hajj</a>
 </div>
 
 <div id="posts"></div>
 
 <div id="detailContainer" class="hidden"></div>
+
+<script id="schema-data" type="application/ld+json"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
@@ -138,6 +144,7 @@
     try {
       const res = await fetch(sheetUrl);
       const text = await res.text();
+      // Yahan se code crash hone ka khatra tha. Agar JSON parsing mein error aaye to check karein.
       const json = JSON.parse(text.substr(47).slice(0, -2)); 
       const rows = json.table.rows;
 
@@ -169,14 +176,17 @@
       renderPosts(posts);
       allPosts = posts; 
 
-      // 🆕 Homepage load hone par default SEO tags wapas set karein.
+      // Homepage load hone par default SEO tags wapas set karein.
       document.title = defaultTitle;
       document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
       document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
       document.querySelector('meta[property="og:description"]').setAttribute("content", "Authentic Islamic Questions and Answers.");
+      
+      // Schema tag ko empty karein jab homepage par hon
+      document.getElementById('schema-data').textContent = ''; 
 
     } catch(err) {
-      document.getElementById('posts').innerHTML = "<p style='color:red; text-align:center'>❌ Error loading data.</p>";
+      document.getElementById('posts').innerHTML = "<p style='color:red; text-align:center'>❌ Error loading data. Please check Google Sheet URL format.</p>";
       console.error(err);
     }
   }
@@ -210,10 +220,9 @@ function renderPosts(posts){
     document.querySelector('meta[name="description"]').setAttribute("content", postDescription);
     document.querySelector('meta[property="og:title"]').setAttribute("content", p.title);
     document.querySelector('meta[property="og:description"]').setAttribute("content", postDescription);
-    // (Optional: Agar aapke paas post image hai to og:image bhi update kar sakte hain)
 
-    // 3. Schema Markup (Structured Data) JSON-LD
-    let schemaMarkup = '';
+    // 3. Schema Markup (Structured Data) JSON-LD Update
+    const schemaElement = document.getElementById('schema-data');
     if (p.question && p.answer) {
         const schema = {
             "@context": "https://schema.org",
@@ -229,7 +238,11 @@ function renderPosts(posts){
                 }
             }
         };
-        schemaMarkup = `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+        // ❌ FIXED: schemaMarkup ko innerHTML mein inject karne ke bajaye, 
+        // sidhe script tag ke textContent ko update karein
+        schemaElement.textContent = JSON.stringify(schema);
+    } else {
+        schemaElement.textContent = ''; // Agar data nahi hai to empty rakhein
     }
     
     // 📢 END: DYNAMIC SEO UPDATE
@@ -246,7 +259,7 @@ function renderPosts(posts){
         
         <h3>${p.title}</h3> 
         
-        ${schemaMarkup} ${p.question ? `<div class="content-section">${p.question}</div>` : ""} 
+        ${p.question ? `<div class="content-section">${p.question}</div>` : ""} 
         
         ${p.answer ? `<div class="content-section">${makeLinksClickable(p.answer)}</div>` : ""}
         
@@ -275,11 +288,14 @@ function renderPosts(posts){
     document.getElementById("detailContainer").classList.add("hidden");
     document.getElementById("posts").classList.remove("hidden");
     
-    // 🆕 GoBack par default SEO tags wapas set karein.
+    // GoBack par default SEO tags wapas set karein.
     document.title = defaultTitle;
     document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
     document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
     document.querySelector('meta[property="og:description"]').setAttribute("content", "Authentic Islamic Questions and Answers.");
+    
+    // Schema tag ko empty karein jab homepage par hon
+    document.getElementById('schema-data').textContent = ''; 
   }
 
   function changeColor(){
