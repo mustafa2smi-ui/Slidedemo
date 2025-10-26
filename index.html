@@ -34,7 +34,7 @@
   .color-btn {background:#ff9800; color:white;}
   .back-btn {background:#607d8b; color:white;}
   
-  /* 🆕 New Menu Styling (Responsive, Wrap, Border) */
+  /* New Menu Styling (Responsive, Wrap, Border) */
   .menu {
       background:#e0f2f1; /* Light background for border effect */
       display: flex;
@@ -113,8 +113,8 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
   let allPosts = []; 
-  const POSTS_PER_PAGE = 5; // 🆕 Sirf 5 post pehle dikhenge
-  let currentVisiblePosts = 0; // Kitne posts abhi dikh rahe hain
+  const POSTS_PER_PAGE = 5; 
+  let currentVisiblePosts = 0; 
   const defaultTitle = "Darul Islam Q&A | Authentic Islamic Questions, Answers & Fiqh";
   const defaultDescription = "Find authentic Islamic Questions and Answers (Q&A), Fiqh Rulings, Duas, and Hajj guides based on trusted references. Darul Islam’s reliable knowledge hub.";
     
@@ -124,7 +124,7 @@
     dua: "https://docs.google.com/spreadsheets/d/1DtRlkaP23ihYmN8mn4Gx7deLicpVhDY6AiY-bN5pqt8/gviz/tq?tqx=out:json",
     rabbana: "https://docs.google.com/spreadsheets/d/YOUR_RABBANA_SHEET_ID/gviz/tq?tqx=out:json",
     hajj: "https://docs.google.com/spreadsheets/d/YOUR_HAJJ_SHEET_ID/gviz/tq?tqx=out:json",
-    // 🆕 Add new sheet URLs here (agar aapne naye menu items jode hain to)
+    // Add new sheet URLs here
     fiqh: "https://docs.google.com/spreadsheets/d/YOUR_FIQH_SHEET_ID/gviz/tq?tqx=out:json", 
     aqidah: "https://docs.google.com/spreadsheets/d/YOUR_AQIDAH_SHEET_ID/gviz/tq?tqx=out:json" 
   };
@@ -134,8 +134,8 @@
     dua: "#e8f5e9",
     rabbana: "#e3f2fd",
     hajj: "#fff3e0",
-    fiqh: "#f3e5f5", // Example new color
-    aqidah: "#e1f5fe" // Example new color
+    fiqh: "#f3e5f5",
+    aqidah: "#e1f5fe"
   };
 
   function makeLinksClickable(text) {
@@ -168,8 +168,8 @@
   async function loadSheet(type='qa') {
     document.body.style.background = themeColors[type] || "#f7f7f7";
     const sheetUrl = sheets[type];
-    if(!sheetUrl) {
-      document.getElementById('posts').innerHTML = `<p style='color:red; text-align:center'>❌ Sheet URL missing for ${type.toUpperCase()}!</p>`;
+    if(!sheetUrl || sheetUrl.includes("YOUR_")) { // Check for placeholder URLs
+      document.getElementById('posts').innerHTML = `<p style='color:orange; text-align:center'>⚠️ Please replace YOUR_SHEET_ID for ${type.toUpperCase()} in the code.</p>`;
       return;
     }
     
@@ -207,9 +207,8 @@
       }).filter(p=>p.title); 
 
       allPosts = posts; 
-      renderPosts(posts); // 🆕 Ab renderPosts ko 'allPosts' ki zaroorat nahi, woh post count handle karega.
+      renderPosts(posts);
 
-      // Default SEO tags set karein
       document.title = defaultTitle;
       document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
       document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
@@ -225,10 +224,8 @@
 function renderPosts(posts){
     const container = document.getElementById("posts");
     
-    // 🆕 Reset visible posts count
     currentVisiblePosts = Math.min(posts.length, POSTS_PER_PAGE);
     
-    // Sirf utne posts map karein jitne dikhane hain
     const visiblePosts = posts.slice(0, currentVisiblePosts);
 
     let html = visiblePosts.map(p=>{
@@ -239,7 +236,6 @@ function renderPosts(posts){
         `;
     }).join('');
     
-    // Agar zyada posts hain to Show More button jodein
     if (posts.length > POSTS_PER_PAGE) {
         html += `<div style="text-align:center; padding-bottom:15px;"><button id="showMoreBtn" class="share-btn" onclick="showMorePosts()">Show More (${posts.length - currentVisiblePosts} remaining)</button></div>`;
     }
@@ -249,7 +245,6 @@ function renderPosts(posts){
     document.getElementById("detailContainer").classList.add("hidden");
 }
 
-// 🆕 New function to load more posts
 function showMorePosts() {
     const container = document.getElementById("posts");
     const posts = allPosts; 
@@ -257,32 +252,27 @@ function showMorePosts() {
     const nextBatchSize = 5; 
     const newEndIndex = Math.min(posts.length, currentVisiblePosts + nextBatchSize);
 
-    // Naye posts ka HTML generate karein
     const newPostsHtml = posts.slice(currentVisiblePosts, newEndIndex).map(p => `
         <div class="post-card" onclick="openPost(${p.id})">
             <h3>${p.title}</h3>
         </div>
     `).join('');
 
-    // Naye posts ko 'showMoreBtn' se pehle insert karein
     const showMoreBtn = document.getElementById("showMoreBtn");
     if (showMoreBtn) {
         showMoreBtn.parentElement.insertAdjacentHTML('beforebegin', newPostsHtml);
     } else {
-        container.insertAdjacentHTML('beforeend', newPostsHtml); // Fallback
+        container.insertAdjacentHTML('beforeend', newPostsHtml); 
     }
     
-    // Current count update karein
     currentVisiblePosts = newEndIndex;
 
     const remaining = posts.length - currentVisiblePosts;
 
     if (remaining > 0) {
-        // Button text update karein
         showMoreBtn.textContent = `Show More (${remaining} remaining)`;
     } else if (showMoreBtn) {
-        // Agar saare posts load ho gaye to button hata dein
-        showMoreBtn.parentElement.remove(); // Button aur div ko hatana
+        showMoreBtn.parentElement.remove(); 
     }
 }
 
@@ -292,7 +282,7 @@ function showMorePosts() {
     const p = allPosts.find(x=>x.id===id); 
     if (!p) return; 
     
-    // 📢 START: DYNAMIC SEO UPDATE
+    // DYNAMIC SEO UPDATE
     
     document.title = `${p.title} | Darul Islam Q&A`;
 
@@ -321,8 +311,6 @@ function showMorePosts() {
     } else {
         schemaElement.textContent = ''; 
     }
-    
-    // 📢 END: DYNAMIC SEO UPDATE
     
     const d = document.getElementById("detailContainer");
     const youtubeEmbed = getYoutubeEmbed(p.link);
@@ -398,10 +386,14 @@ function showMorePosts() {
         youtubeFrame.style.display = 'none';
     }
 
+    // 🆕 FIX: Custom message ko aur URL ko text property mein forcefully shamil karna
+    const customMessage = "Aur Aise hi Islamic Masail Ko janne Ke liye Website Par visit kare";
+    const postContent = p.question || p.title;
+
     const shareData = {
         title: p.title || "DarulIslam Q&A",
-        // 🆕 Custom share message
-        text: `${p.question || p.title}\n\nAur Aise hi Islamic Masail Ko janne Ke liye Website Par visit kare`,
+        // Aggressive text concatenation: Title + Content + Custom Message + URL
+        text: `${p.title}\n\n${postContent}\n\n${customMessage}\n\nVisit: ${window.location.href}`,
         url: window.location.href, 
     };
     
