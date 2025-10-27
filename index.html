@@ -267,92 +267,6 @@ body.dark .watermark {
   font-size: 14px;
   cursor: pointer;
 }
-  /* --------------------------------- */
-/* 🆕 GALLERY STYLING */
-/* --------------------------------- */
-.gallery-item {
-    width: 100%;
-    aspect-ratio: 1 / 1; /* Square box */
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: transform 0.3s;
-}
-
-.gallery-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.gallery-item:hover {
-    transform: scale(1.05);
-}
-
-/* --------------------------------- */
-/* 🆕 MODAL STYLING (Big Image View) */
-/* --------------------------------- */
-#galleryModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9); /* Dark overlay */
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-}
-
-.modal-content {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 90%;
-    max-height: 90%;
-    overflow-y: auto;
-    position: relative;
-    text-align: center;
-}
-
-#modalImage {
-    max-width: 100%;
-    max-height: 70vh; /* Viewport height ka 70% */
-    height: auto;
-    display: block;
-    margin: 0 auto 15px;
-    border-radius: 8px;
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    color: var(--text);
-    cursor: pointer;
-}
-
-.modal-actions {
-    margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-
-.download-btn {
-    background: #0077cc; /* Blue for download */
-    color: white;
-    padding: 8px 15px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-}
   
 </style>
 </head>
@@ -368,8 +282,7 @@ body.dark .watermark {
   <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
   <a href="#" onclick="loadSheet('hajj')">Hajj</a>
   <a href="#" onclick="loadSheet('fiqh')">Fiqh</a>
-  <a href="#" onclick="loadSheet('aqidah')">Aqidah</a>
-    <a href="#" onclick="loadSheet('gallery')">🖼️ Gallery</a> 
+  <a href="#" onclick="loadSheet('aqidah')">Aqidah</a> 
 </div>
 
 <div id="locationBox" class="info-box" style="cursor: pointer;" onclick="useMyLocation()">
@@ -387,17 +300,8 @@ body.dark .watermark {
 <div id="posts"></div>
 
 <div id="detailContainer" class="hidden"></div>
-  <div id="galleryModal" class="hidden">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeModal()">✖</span>
-    <img id="modalImage" src="" alt="Full size Islamic image">
-    <h3 id="modalCaption"></h3>
-    <div class="modal-actions">
-      <button class="share-btn" id="modalShareBtn" onclick="shareGalleryImage()">📤 Share</button>
-      <a id="modalDownloadLink" download="darulislam_image.png" class="download-btn">⬇ Download</a>
-    </div>
-  </div>
-  </div>
+
+  
   
 
 <script id="schema-data" type="application/ld+json"></script>
@@ -521,13 +425,6 @@ if (themeBtn) {
       }).filter(p=>p.title); 
 
       allPosts = posts; 
-      if (type === 'gallery') {
-    renderGallery(posts);
-    currentGalleryData = posts; // Data store karein
-    // SEO meta tags ko update karna na bhoolein
-    document.title = "Gallery | Darul Islam Q&A";
-    document.querySelector('meta[name="description"]').setAttribute("content", "View beautiful Islamic Ayats, Hadith, and Motivational Quotes images.");
-} else {
       renderPosts(posts);
 
       document.title = defaultTitle;
@@ -941,77 +838,6 @@ function getRandomPostSnippet() {
     // Format the snippet
     return `\n\nEk Masla Jaan-ne Ke Liye:\nQ: ${p.title}\nA: ${snippet}`;
 }
-  // 🖼️ Renders the Image Gallery Grid
-function renderGallery(images) {
-    const container = document.getElementById("posts");
-    document.getElementById("detailContainer").classList.add("hidden");
-
-    if (images.length === 0) {
-        container.innerHTML = "<p style='text-align:center;'>No images found in the gallery.</p>";
-        return;
-    }
-
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
-    container.style.gap = '10px';
-    container.style.padding = '15px';
-
-    let html = images.filter(img => img.image).map((img, index) => {
-        return `
-            <div class="gallery-item" onclick="openModal(${index})">
-                <img src="${img.image}" alt="${img.title}" loading="lazy">
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-    container.classList.remove("hidden");
-}
-
-// 🖼️ Open Modal (Big View)
-function openModal(index) {
-    const imgData = currentGalleryData[index];
-    if (!imgData) return;
-
-    const modal = document.getElementById('galleryModal');
-    const imgElement = document.getElementById('modalImage');
-    const captionElement = document.getElementById('modalCaption');
-    const downloadLink = document.getElementById('modalDownloadLink');
-
-    imgElement.src = imgData.image;
-    captionElement.textContent = imgData.title;
-    downloadLink.href = imgData.image; // Download direct image
-
-    // Store current image URL for sharing
-    modal.dataset.currentUrl = imgData.image;
-    modal.dataset.currentTitle = imgData.title;
-
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Scroll lock
-}
-
-// 🖼️ Close Modal
-function closeModal() {
-    document.getElementById('galleryModal').classList.add('hidden');
-    document.body.style.overflow = 'auto'; // Scroll unlock
-}
-
-// 🖼️ Share Image (URL)
-function shareGalleryImage() {
-    const modal = document.getElementById('galleryModal');
-    const imageUrl = modal.dataset.currentUrl;
-    const imageTitle = modal.dataset.currentTitle;
-
-    if (navigator.share) {
-        navigator.share({
-            title: imageTitle || "Darul Islam Gallery Image",
-            text: `${imageTitle}\n\nDownload and view more:`,
-            url: imageUrl // Image URL ko hi share karein
-        }).catch(e => console.error("Gallery Share failed:", e));
-    } else {
-        alert("Web Share API not supported. Please copy the image URL from the download link.");
-    }
-      }
   
 </script>
   <footer>
