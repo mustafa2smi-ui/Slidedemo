@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Darul Islam Q&A | Authentic Islamic Questions, Answers & Fiqh</title>
+<meta name="description" content="Find authentic Islamic Questions and Answers (Q&A), Fiqh Rulings, Duas, and Hajj guides based on trusted references. Darul Islam’s reliable knowledge hub.">
+<meta name="keywords" content="islamic q&a, fiqh, islamic questions and answers, dua, rabbana, hajj guide, authentic islamic rulings, sunnah, hadith">
+<meta property="og:title" content="Darul Islam Q&A" />
+<meta property="og:description" content="Authentic Islamic Questions and Answers." />
+<meta property="og:image" content="icon-512.png" />
+<meta property="og:url" content="https://YOUR-NETLIFY-URL.netlify.app" />
+<link rel="manifest" href="manifest.json" />
+<style>
+  
+  body {font-family: sans-serif; background:#f9f9f9; margin:0; padding:0;}
+  header {background:#004d40; color:white; padding:15px; text-align:center;}
+  
+  /* Buttons styling */
+  .share-btn, .img-share-btn, .color-btn, .back-btn {border:none; padding:8px 15px; border-radius:8px; cursor:pointer; margin-top:10px;}
+  .share-btn {background:#00897b; color:white;}
+  .img-share-btn {background:#4caf50; color:white;}
+  .color-btn {background:#ff9800; color:white;}
+  .back-btn {background:#607d8b; color:white;}
+  
+  /* New Menu Styling */
+  .menu {
+      background:#e0f2f1;
+      display: flex;
+      flex-wrap: wrap; 
+      justify-content: center; 
+      padding: 5px; 
+      gap: 8px; 
+  }
+  .menu a {
+      color: #004d40;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 15px;
+      border: 2px solid #004d40;
+      border-radius: 20px;
+      transition: background 0.3s;
+      white-space: nowrap;
+  }
+  .menu a:hover {
+      background: #004d40;
+      color: white;
+  }
+  
+  .hidden {display:none;}
+  
+  /* YouTube Embed Styling */
+  .youtube-embed { 
+      margin-top: 15px; 
+      margin-bottom: 15px; 
+      position: relative; 
+      width: 100%; 
+      height: 0; 
+      padding-bottom: 56.25%; 
+      overflow: hidden;
+  }
+  .youtube-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px; 
+  }
+
+  /* 🆕 Watermark Style */
+  .watermark {
+      position: absolute;
+      bottom: 5px; 
+      right: 15px; 
+      font-size: 0.7em;
+      color: rgba(0, 0, 0, 0.3); 
+      font-weight: bold;
+      pointer-events: none; 
+      z-index: 10; 
+  }
+
+  a { color: #0077cc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Style for content separation without labels */
+  .content-section { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+  .content-section:last-of-type { border-bottom: none; }
+  h3 { margin-top: 0; margin-bottom: 10px; }
+/* --------------------------------- */
+/* 🆕 PERFECT DARK MODE & THEME VARIABLES (Updated) */
+/* --------------------------------- */
+:root {
+  /* Light Mode */
+  --bg: #f9f9f9; 
+  --text: #111111; 
+  --card: #ffffff; /* Question/Answer Card Background */
+  --accent: #004d40; /* Header, Footer, Main Buttons (Dark Teal) */
+  --accent-light: #00897b; /* Share Button, Menu Active (Lighter Teal) */
+  --secondary-bg: #e0f2f1; /* Menu background, Hover effects */
+  --border-color: #eeeeee; /* Card separation lines */
+}
+
+body.dark {
+  /* Dark Mode */
+  --bg: #121212; /* Near Black */
+  --text: #eeeeee; /* Off White */
+  --card: #1e1e1e; /* Elevated Card Background */
+  --accent: #2ecc71; /* Vibrant Green */
+  --accent-light: #35a065; 
+  --secondary-bg: #333333; /* Darker Menu background, Hover effects */
+  --border-color: #333333;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text); /* Text color set here */
+  transition: all 0.4s ease;
+}
+
+/* --------------------------------- */
+/* HEADER AND FOOTER (Use --accent) */
+/* --------------------------------- */
+header {
+  background: var(--accent); 
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+}
+
+#themeToggle {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background: var(--accent); 
+  color: #fff;
+}
+
+/* --------------------------------- */
+/* CARD STYLING (Use --card and --text) */
+/* --------------------------------- */
+.card, .post-card {
+  background: var(--card); /* Main Card background */
+  color: var(--text); /* Main Card text color */
+  margin:15px; padding:15px; border-radius:12px; 
+  box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card img {
+    max-width:100%; 
+    height: auto; 
+    display: block; 
+    border-radius:10px; 
+    margin-top:8px;
+}
+
+
+/* Content separator (Adjusted for dark mode) */
+.content-section { 
+    margin-bottom: 10px; 
+    padding-bottom: 5px; 
+    border-bottom: 1px solid var(--border-color); /* Light/Dark Border */
+}
+.content-section:last-of-type { border-bottom: none; }
+
+/* --------------------------------- */
+/* BUTTON STYLING */
+/* --------------------------------- */
+.share-btn, .img-share-btn, .color-btn, .back-btn {border:none; padding:8px 15px; border-radius:8px; cursor:pointer; margin-top:10px;}
+.share-btn {background: var(--accent-light); color:white;}
+.img-share-btn {background:#4caf50; color:white;}
+.color-btn {background:#ff9800; color:white;}
+.back-btn {background:#607d8b; color:white;}
+
+/* --------------------------------- */
+/* NAMAZ/LOCATION/DISCLAIMER BOX STYLES */
+/* --------------------------------- */
+.info-box {
+  margin: 10px auto;
+  padding: 10px 14px;
+  max-width: 90%;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  font-size: 15px;
+  color: var(--text);
+  text-align: center;
+  transition: 0.3s;
+}
+.info-box:hover {
+  background: var(--secondary-bg);
+  transform: scale(1.02);
+}
+
+/* Disclaimer Box Specific Styles */
+.disclaimer {
+  background: #fff8e1; /* Light Yellow */
+  border-color: #fbbf24;
+  color: #854d0e;
+}
+body.dark .disclaimer {
+   background: #3c2e00; /* Dark Yellow-Brown */
+   border-color: #fbbf24;
+   color: #e0d0a0;
+}
+
+/* Namaz Time Bar */
+.namaz-times {
+  margin: 10px auto;
+  padding: 15px;
+  text-align: center;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light)); /* Green gradient */
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  max-width: 90%;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.namaz-times h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #e0f2f1; /* Light color for heading */
+}
+.namaz-times ul li {
+    text-align: left;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.namaz-times ul li:last-child {
+    border-bottom: none;
+}
+/* Watermark (unchanged) */
+.watermark {
+    position: absolute;
+    bottom: 5px;
+    right: 15px;
+    font-size: 0.7em;
+    color: rgba(0, 0, 0, 0.3); 
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 10;
+}
+body.dark .watermark {
+    color: rgba(255, 255, 255, 0.3); /* Watermark light in dark mode */
+}
+.header-share-btn {
+  background: var(--accent-light); /* Green from variables */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+  
+</style>
+</head>
+<body>
+<header>
+  <h1>🕌 Darul Islam Q&A</h1>
+  <button id="siteShareBtn" class="header-share-btn">🔗 Share Site</button>
+  <button id="themeToggle">🌙</button>
+</header>
+<div class="menu">
+  <a href="#" onclick="loadSheet('qa')">Q&A</a>
+  <a href="#" onclick="loadSheet('dua')">Dua</a>
+  <a href="#" onclick="loadSheet('rabbana')">Rabbana</a>
+  <a href="#" onclick="loadSheet('hajj')">Hajj</a>
+  <a href="#" onclick="loadSheet('fiqh')">Fiqh</a>
+  <a href="#" onclick="loadSheet('aqidah')">Aqidah</a>
+</div>
+
+<div id="locationBox" class="info-box" style="cursor: pointer;" onclick="useMyLocation()">
+  📍 <span id="locationText">Detecting your location...</span>
+</div>
+
+<div id="namazTimes" class="namaz-times">
+  🕋 Loading Namaz Times...
+</div>
+
+<div id="disclaimerBox" class="info-box disclaimer">
+  ⚠️ <b>Disclaimer:</b> Salah timings may vary slightly depending on your local Masjid or calculation method.
+</div>
+
+<div id="posts"></div>
+
+<div id="detailContainer" class="hidden"></div>
+
+<script id="schema-data" type="application/ld+json"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  let allPosts = []; 
+  const POSTS_PER_PAGE = 5; 
+  let currentVisiblePosts = 0; 
+  const defaultTitle = "Darul Islam Q&A | Authentic Islamic Questions, Answers & Fiqh";
+  const defaultDescription = "Find authentic Islamic Questions and Answers (Q&A), Fiqh Rulings, Duas, and Hajj guides based on trusted references. Darul Islam’s reliable knowledge hub.";
+  const WEBSITE_NAME = "DarulIslamQnA.com"; 
+    
+  // --- Google Sheet URLs ---
+  const sheets = {
+    qa: "https://docs.google.com/spreadsheets/d/1lnXSvR2j6hTGWT_Bj7H3BTnDtpnPWQJl0OdpffeWWr4/gviz/tq?tqx=out:json",
+    dua: "https://docs.google.com/spreadsheets/d/1DtRlkaP23ihYmN8mn4Gx7deLicpVhDY6AiY-bN5pqt8/gviz/tq?tqx=out:json",
+    rabbana: "https://docs.google.com/spreadsheets/d/YOUR_RABBANA_SHEET_ID/gviz/tq?tqx=out:json",
+    hajj: "https://docs.google.com/spreadsheets/d/YOUR_HAJJ_SHEET_ID/gviz/tq?tqx=out:json",
+    fiqh: "https://docs.google.com/spreadsheets/d/YOUR_FIQH_SHEET_ID/gviz/tq?tqx=out:json", 
+    aqidah: "https://docs.google.com/spreadsheets/d/YOUR_AQIDAH_SHEET_ID/gviz/tq?tqx=out:json" 
+  };
+
+  const themeColors = {
+    qa: "#ffe0b2",
+    dua: "#e8f5e9",
+    rabbana: "#e3f2fd",
+    hajj: "#fff3e0",
+    fiqh: "#f3e5f5",
+    aqidah: "#e1f5fe"
+  };
+
+  function makeLinksClickable(text) {
+    if (!text) return "";
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+  }
+  
+  function getYoutubeEmbed(link) {
+    if (!link) return "";
+    
+    let videoId = "";
+    
+    if (link.includes("youtube.com/watch?v=")) {
+      videoId = link.split("v=")[1]?.split("&")[0];
+    } else if (link.includes("youtube.com/shorts/")) {
+      videoId = link.split("youtube.com/shorts/")[1]?.split("?")[0];
+    } else if (link.includes("youtu.be/")) {
+      videoId = link.split("youtu.be/")[1]?.split("?")[0];
+    } else if (link.includes("youtube.com/embed/")) {
+        videoId = link.split("youtube.com/embed/")[1]?.split("?")[0];
+    }
+    
+    if(videoId && videoId.length >= 10) { 
+        return `<div class="youtube-embed"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    }
+    return "";
+  }
+// ===============================================
+// 🌙 DARK/LIGHT MODE LOGIC
+// ===============================================
+const themeBtn = document.getElementById('themeToggle');
+if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        themeBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Check saved theme on load
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+        themeBtn.textContent = '☀️';
+    } else {
+        themeBtn.textContent = '🌙';
+    }
+}
+// ===============================================
+// 🌙 END OF DARK/LIGHT MODE LOGIC
+// ===============================================
+  
+  async function loadSheet(type='qa') {
+    document.body.style.background = themeColors[type] || "#f7f7f7";
+    const sheetUrl = sheets[type];
+    if(!sheetUrl || sheetUrl.includes("YOUR_")) { 
+      document.getElementById('posts').innerHTML = `<p style='color:orange; text-align:center'>⚠️ Please replace YOUR_SHEET_ID for ${type.toUpperCase()} in the code.</p>`;
+      return;
+    }
+    
+    document.getElementById('posts').innerHTML = "<p style='text-align:center'>⏳ Loading...</p>";
+
+    try {
+      const res = await fetch(sheetUrl);
+      const text = await res.text();
+      const json = JSON.parse(text.substr(47).slice(0, -2)); 
+      const rows = json.table.rows;
+
+      const posts = rows.map((r, i) => {
+        let rawDate = r.c[5]?.v || "";
+        
+        if (/Date\(\d+,\d+,\d+\)/.test(rawDate)) {
+          const match = rawDate.match(/Date\((\d+),(\d+),(\d+)\)/);
+          if (match) {
+            const year = match[1];
+            const month = String(parseInt(match[2]) + 1).padStart(2, '0');
+            const day = String(match[3]).padStart(2, '0');
+            rawDate = `${day}/${month}/${year}`;
+          }
+        }
+
+        return {
+          id: i + 1,
+          title: r.c[0]?.v || "",
+          question: r.c[1]?.v || "",
+          answer: r.c[2]?.v || "",
+          reference: r.c[3]?.v || "",
+          link: r.c[4]?.v || "",
+          date: rawDate.trim(),
+          image: r.c[6]?.v || ""
+        };
+      }).filter(p=>p.title); 
+
+      allPosts = posts; 
+      renderPosts(posts);
+
+      document.title = defaultTitle;
+      document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
+      document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
+      document.querySelector('meta[property="og:description"]').setAttribute("content", "Authentic Islamic Questions and Answers.");
+      document.getElementById('schema-data').textContent = ''; 
+
+    } catch(err) {
+      document.getElementById('posts').innerHTML = "<p style='color:red; text-align:center'>❌ Error loading data. Please check Google Sheet URL format.</p>";
+      console.error(err);
+    }
+  }
+
+function renderPosts(posts){
+    const container = document.getElementById("posts");
+    
+    currentVisiblePosts = Math.min(posts.length, POSTS_PER_PAGE);
+    
+    const visiblePosts = posts.slice(0, currentVisiblePosts);
+
+    let html = visiblePosts.map(p=>{
+        return `
+            <div class="post-card" onclick="openPost(${p.id})">
+                <h3>${p.title}</h3>
+            </div>
+        `;
+    }).join('');
+    
+    if (posts.length > POSTS_PER_PAGE) {
+        html += `<div style="text-align:center; padding-bottom:15px;"><button id="showMoreBtn" class="share-btn" onclick="showMorePosts()">Show More (${posts.length - currentVisiblePosts} remaining)</button></div>`;
+    }
+
+    container.innerHTML = html;
+    document.getElementById("posts").classList.remove("hidden");
+    document.getElementById("detailContainer").classList.add("hidden");
+}
+
+function showMorePosts() {
+    const container = document.getElementById("posts");
+    const posts = allPosts; 
+    
+    const nextBatchSize = 5; 
+    const newEndIndex = Math.min(posts.length, currentVisiblePosts + nextBatchSize);
+
+    const newPostsHtml = posts.slice(currentVisiblePosts, newEndIndex).map(p => `
+        <div class="post-card" onclick="openPost(${p.id})">
+            <h3>${p.title}</h3>
+        </div>
+    `).join('');
+
+    const showMoreBtn = document.getElementById("showMoreBtn");
+    if (showMoreBtn) {
+        showMoreBtn.parentElement.insertAdjacentHTML('beforebegin', newPostsHtml);
+    } else {
+        container.insertAdjacentHTML('beforeend', newPostsHtml); 
+    }
+    
+    currentVisiblePosts = newEndIndex;
+
+    const remaining = posts.length - currentVisiblePosts;
+
+    if (remaining > 0) {
+        showMoreBtn.textContent = `Show More (${remaining} remaining)`;
+    } else if (showMoreBtn) {
+        showMoreBtn.parentElement.remove(); 
+    }
+}
+
+
+  // --- Open detail card (UPDATED for Q/A consolidation and button) ---
+  function openPost(id){
+    const p = allPosts.find(x=>x.id===id); 
+    if (!p) return; 
+    
+    // DYNAMIC SEO UPDATE (Unchanged)
+    document.title = `${p.title} | Darul Islam Q&A`;
+    const postDescription = p.question ? p.question.substring(0, 150) + (p.question.length > 150 ? "..." : "") : "Authentic Islamic Q&A Post.";
+    document.querySelector('meta[name="description"]').setAttribute("content", postDescription);
+    document.querySelector('meta[property="og:title"]').setAttribute("content", p.title);
+    document.querySelector('meta[property="og:description"]').setAttribute("content", postDescription);
+
+    const schemaElement = document.getElementById('schema-data');
+    if (p.question && p.answer) {
+        const schema = { "@context": "https://schema.org", "@type": "QAPage", "mainEntity": { "@type": "Question", "name": p.title, "text": p.question, "acceptedAnswer": { "@type": "Answer", "text": p.answer, "url": window.location.href } } };
+        schemaElement.textContent = JSON.stringify(schema);
+    } else {
+        schemaElement.textContent = ''; 
+    }
+    
+    const d = document.getElementById("detailContainer");
+    const youtubeEmbed = getYoutubeEmbed(p.link);
+    const isYoutubeLink = p.link && (p.link.includes("youtube.com") || p.link.includes("youtu.be"));
+    const displayLink = (!youtubeEmbed && !isYoutubeLink && p.link) ? 
+        `<div class="content-section"><a href="${p.link}" target="_blank">🔗 View Source</a></div>` : "";
+
+
+    d.innerHTML = `
+      <div class="card" id="detailCard">
+        
+        <h3>${p.title}</h3> 
+        
+        ${p.question ? `<div class="content-section">${p.question}</div>` : `<div class="content-section" style="font-weight: bold;">${p.title}</div>`} 
+        
+        ${p.answer ? `<div class="content-section">${makeLinksClickable(p.answer)}</div>` : ""}
+        
+        ${p.reference ? `<div class="content-section"><i>${makeLinksClickable(p.reference)}</i></div>` : ""}
+        
+        ${youtubeEmbed} 
+        
+        ${displayLink}
+        
+        ${p.image ? `<img src="${p.image}" style="max-width:100%; height:auto; border-radius:10px; margin-top:10px; display:block;">` : ""}
+        
+        <p style="font-size:0.8em; color:#777; margin-top:10px;">${p.date || "—"}</p>
+        
+        <span class="watermark">${WEBSITE_NAME}</span>
+
+        <div>
+          <button class="back-btn" onclick="goBack()">⬅ Back</button>
+          <button class="color-btn" onclick="changeColor()">🎨 Change BG</button>
+          <button class="share-btn" onclick='shareAsImage(${p.id})'>🖼️ Share Image</button> 
+        </div>
+      </div>
+    `;
+    document.getElementById("posts").classList.add("hidden");
+    d.classList.remove("hidden");
+  }
+
+  function goBack(){
+    document.getElementById("detailContainer").classList.add("hidden");
+    document.getElementById("posts").classList.remove("hidden");
+    
+    document.title = defaultTitle;
+    document.querySelector('meta[name="description"]').setAttribute("content", defaultDescription);
+    document.querySelector('meta[property="og:title"]').setAttribute("content", "Darul Islam Q&A");
+    document.querySelector('meta[property="og:description"]').setAttribute("content", "Authentic Islamic Questions and Answers.");
+    document.getElementById('schema-data').textContent = ''; 
+  }
+
+  function changeColor(){
+    const card = document.getElementById("detailCard");
+    const gradients = [
+      "linear-gradient(135deg,#ffecd2,#fcb69f)",
+      "linear-gradient(135deg,#a1c4fd,#c2e9fb)",
+      "linear-gradient(135deg,#fddb92,#d1fdff)",
+      "linear-gradient(135deg,#84fab0,#8fd3f4)",
+      "linear-gradient(135deg,#fccb90,#d57eeb)",
+      "linear-gradient(135deg,#e0c3fc,#8ec5fc)"
+    ];
+    card.style.background = gradients[Math.floor(Math.random()*gradients.length)];
+  }
+
+  // ❌ DELETED: prepareShare(id) function
+  // ❌ DELETED: shareTextOnly(id) function
+
+
+  // 🖼️ Share As Image (UPDATED to focus only on image share/download)
+  async function shareAsImage(id) {
+    const p = allPosts.find(x => x.id === id); 
+    if (!p) return;
+
+    const card = document.getElementById("detailCard");
+    
+    // 1. YouTube Frame ko Chhipana
+    const youtubeFrame = card.querySelector('.youtube-embed');
+    if (youtubeFrame) {
+        youtubeFrame.style.display = 'none';
+    }
+    
+    const shareUrl = window.location.href;
+    const shareData = {
+        title: p.title || "DarulIslam Q&A",
+        text: `Check out this Islamic Q&A: ${p.title}`,
+        url: shareUrl, 
+    };
+    
+    // Hide buttons before capture
+    const buttons = card.querySelectorAll("button");
+    buttons.forEach(b => b.style.display = "none"); 
+    
+    // html2canvas takes screenshot
+    const canvas = await html2canvas(card, {
+        allowTaint: true, 
+        useCORS: true, 
+        logging: false 
+    });
+    
+    // 2. YouTube Frame ko Wapas Dikhana
+    if (youtubeFrame) {
+        youtubeFrame.style.display = ''; 
+    }
+    
+    // Show buttons after capture
+    buttons.forEach(b => b.style.display = ""); 
+    
+    canvas.toBlob(blob => {
+      const file = new File([blob], "question.png", { type: "image/png" });
+      
+      if (navigator.share) {
+        // Share image file only (will fail gracefully if files are not supported)
+        navigator.share({
+          ...shareData, 
+          files: [file]
+        }).catch(e=> {
+            console.error("Card Share failed/canceled, defaulting to download:", e);
+            // Fallback to download if sharing fails or is canceled
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'question.png';
+            a.click();
+        });
+      } else {
+        // Fallback: Download image for non-supporting devices
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'question.png';
+        a.click();
+      }
+    }, 'image/png'); 
+  }
+// ===============================================
+// 🕌 NAMAZ TIME AND LOCATION FUNCTIONS (Unchanged)
+// ===============================================
+
+// 🧭 Convert 24-hour → 12-hour format
+function convertTo12Hour(time24) {
+  let [hours, minutes] = time24.split(":");
+  hours = parseInt(hours);
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+// 🗺 Show human readable location (OpenStreetMap)
+async function showAddress(lat, lng) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const data = await res.json();
+    document.getElementById("locationText").innerText = `📍 ${data.display_name}`;
+  } catch {
+    document.getElementById("locationText").innerText = `📍 Latitude: ${lat.toFixed(2)}, Longitude: ${lng.toFixed(2)}`;
+  }
+}
+
+// 🌙 Fetch Namaz times from API
+async function fetchPrayerTimes(lat, lng, cityName = "Delhi") {
+  try {
+    // Save current location to local storage
+    localStorage.setItem('prayerLat', lat);
+    localStorage.setItem('prayerLng', lng);
+    localStorage.setItem('prayerCity', cityName);
+
+    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=2`);
+    const data = await res.json();
+    const t = data.data.timings;
+
+    const prayerNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+    let listHTML = `
+      <h3>🕌 Salah Times - ${cityName}</h3>
+      <ul style="list-style:none;padding:0;margin:5px 0;">
+    `;
+
+    prayerNames.forEach(name => {
+      const time12 = convertTo12Hour(t[name]);
+      listHTML += `<li><b>${name}:</b> ${time12}</li>`;
+    });
+
+    listHTML += `
+      </ul>
+      <button onclick="useMyLocation()" 
+        style="background:#198754;color:#fff;border:none;padding:6px 12px;
+        border-radius:6px;cursor:pointer;margin-top:10px;">📍 Use My Current Location</button>
+    `;
+
+    document.getElementById("namazTimes").innerHTML = listHTML;
+
+    // Show human readable address
+    showAddress(lat, lng);
+  } catch (e) {
+    console.error(e);
+    document.getElementById("namazTimes").textContent = "Error fetching Salah times.";
+  }
+}
+
+// 📍 Detect user location or fallback to saved/Delhi location
+function useMyLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        fetchPrayerTimes(lat, lng, "Your Current Location");
+      },
+      () => {
+        alert("Location permission denied! Using saved location or Delhi as default.");
+        loadInitialPrayerTimes(); // Revert to saved/default
+      }
+    );
+  } else {
+    alert("Geolocation not supported on this device.");
+    loadInitialPrayerTimes(); // Revert to saved/default
+  }
+}
+
+// 🔹 Initial Load Function: Saved Location Priority
+function loadInitialPrayerTimes() {
+    const savedLat = localStorage.getItem('prayerLat');
+    const savedLng = localStorage.getItem('prayerLng');
+    const savedCity = localStorage.getItem('prayerCity');
+    
+    // 🆕 Header Share Button Listener
+    const siteShareBtn = document.getElementById('siteShareBtn');
+    if (siteShareBtn) {
+        siteShareBtn.addEventListener('click', shareWebsite);
+    }
+
+
+    if (savedLat && savedLng) {
+        // Use saved location
+        fetchPrayerTimes(savedLat, savedLng, savedCity || "Saved Location");
+    } else {
+        // Default to Delhi
+        fetchPrayerTimes(28.6139, 77.2090, "Delhi (Default)");
+    }
+}
+
+// 🔹 Run on page load
+window.addEventListener("load", loadInitialPrayerTimes);
+// ===============================================
+// 🕌 END OF NAMAZ TIME AND LOCATION FUNCTIONS
+// ===============================================
+  
+  // --- Load default sheet ---
+  loadSheet('qa');
+
+  // --- PWA Service Worker (Kept as is) ---
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(()=>console.log("✅ PWA active"))
+      .catch(err=>console.error("SW failed:",err));
+  }
+  
+// 🆕 New Function for Sharing Site Link/Meta (Header Button)
+function shareWebsite() {
+    const shareData = {
+        title: defaultTitle,
+        text: `Aur Aise hi Islamic Masail Ko janne Ke liye Darul Islam Q&A par visit karein.`, 
+        url: window.location.href.split('?')[0] // Base URL
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData).catch(error => {
+            console.error("Sharing website failed:", error);
+        });
+    } else {
+        // Desktop fallback
+        prompt("Copy this text and link:", `${shareData.text}\n${shareData.url}`);
+    }
+}
+</script>
+  <footer>
+  <p>© 2025 Darul Islam Q&A | Authentic Islamic Knowledge</p>
+  </footer>
+  
+</body>
+</html>
