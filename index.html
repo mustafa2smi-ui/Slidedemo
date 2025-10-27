@@ -267,13 +267,24 @@ body.dark .disclaimer {
 body.dark .watermark {
     color: rgba(255, 255, 255, 0.3); /* Watermark light in dark mode */
 }
-
+.header-share-btn {
+  background: var(--accent-light); /* Green from variables */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 10px; /* Theme button se thoda gap */
+}
+  
 </style>
 </head>
 <body>
 <header>
   <h1>🕌 Darul Islam Q&A</h1>
   <button id="themeToggle">🌙</button>
+   <button id="siteShareBtn" class="header-share-btn">🔗</button>
 </header>
 <div class="menu">
   <a href="#" onclick="loadSheet('qa')">Q&A</a>
@@ -807,6 +818,25 @@ window.addEventListener("load", loadInitialPrayerTimes);
       .then(()=>console.log("✅ PWA active"))
       .catch(err=>console.error("SW failed:",err));
   }
+  // 🆕 New Function for Sharing Site Link/Meta (Header Button)
+function shareWebsite() {
+    const shareData = {
+        title: defaultTitle,
+        text: `Aur Aise hi Islamic Masail Ko janne Ke liye Darul Islam Q&A par visit karein.`, 
+        url: window.location.href.split('?')[0] // Base URL
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData).catch(error => {
+            console.error("Sharing website failed:", error);
+        });
+    } else {
+        // Desktop fallback
+        prompt("Copy this text and link:", `${shareData.text}\n${shareData.url}`);
+    }
+}
+// Aur is function ko window.addEventListener("load", ...) ke andar call karna mat bhuliyega.
+  
 </script>
   <footer>
   <p>© 2025 Darul Islam Q&A | Authentic Islamic Knowledge</p>
