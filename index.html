@@ -764,7 +764,7 @@ window.addEventListener("load", loadInitialPrayerTimes);
       .then(()=>console.log("✅ PWA active"))
       .catch(err=>console.error("SW failed:",err));
   }
-  
+  /*
 // 🆕 New Function for Sharing Site Link/Meta (Header Button)
 function shareWebsite() {
     const shareData = {
@@ -782,6 +782,60 @@ function shareWebsite() {
         prompt("Copy this text and link:", `${shareData.text}\n${shareData.url}`);
     }
 }
+  */
+  // 🔄 Updated Function for Sharing Site Link/Meta (Header Button)
+function shareWebsite() {
+    const postSnippet = getRandomPostSnippet(); // Random Q&A snippet fetch karein
+    
+    const baseText = `Aur Aise hi Islamic Masail Ko janne Ke liye Darul Islam Q&A par visit karein.`;
+    
+    const shareData = {
+        title: defaultTitle,
+        // Custom message aur random snippet ko jod kar share karein
+        text: baseText + postSnippet, 
+        url: window.location.href.split('?')[0] // Base URL
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData).catch(error => {
+            console.error("Sharing website failed:", error);
+        });
+    } else {
+        // Desktop fallback
+        prompt("Copy this text and link:", `${shareData.text}\n${shareData.url}`);
+    }
+}
+  
+  // 🆕 New function to get a random post snippet from allPosts
+function getRandomPostSnippet() {
+    // Ensure allPosts is loaded and has data
+    if (!allPosts || allPosts.length === 0) {
+        return "";
+    }
+    
+    // Filter posts that have an answer to make the snippet meaningful
+    const validPosts = allPosts.filter(p => p.answer && p.title);
+    if (validPosts.length === 0) {
+        return "";
+    }
+
+    // Pick a random post
+    const randomIndex = Math.floor(Math.random() * validPosts.length);
+    const p = validPosts[randomIndex];
+    
+    // Clean and shorten the answer (e.g., first 150 characters)
+    // Remove potential HTML tags/links before shortening
+    let snippet = p.answer.replace(/<[^>]*>/g, '').trim(); 
+    if (snippet.length > 150) {
+        snippet = snippet.substring(0, 150) + "...\n(Read more at site)";
+    } else if (snippet.length === 0) {
+        return ""; // If answer is empty after cleaning
+    }
+
+    // Format the snippet
+    return `\n\nEk Masla Jaan-ne Ke Liye:\nQ: ${p.title}\nA: ${snippet}`;
+}
+  
 </script>
   <footer>
   <p>© 2025 Darul Islam Q&A | Authentic Islamic Knowledge</p>
