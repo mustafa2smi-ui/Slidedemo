@@ -509,7 +509,7 @@ function showMorePosts() {
   function openPost(id){
     const p = allPosts.find(x=>x.id===id); 
     if (!p) return; 
-    
+    /*
     // DYNAMIC SEO UPDATE (Unchanged)
     document.title = `${p.title} | Darul Islam Q&A`;
     const postDescription = p.question ? p.question.substring(0, 150) + (p.question.length > 150 ? "..." : "") : "Authentic Islamic Q&A Post.";
@@ -520,6 +520,19 @@ function showMorePosts() {
     const schemaElement = document.getElementById('schema-data');
     if (p.question && p.answer) {
         const schema = { "@context": "https://schema.org", "@type": "QAPage", "mainEntity": { "@type": "Question", "name": p.title, "text": p.question, "acceptedAnswer": { "@type": "Answer", "text": p.answer, "url": window.location.href } } };
+        schemaElement.textContent = JSON.stringify(schema);
+    } else {
+        schemaElement.textContent = ''; 
+    }
+    */
+        // 🆕 अब p.title को ही Description और Schema के लिए Question Text मानें
+    const postDescription = p.title ? p.title.substring(0, 150) + (p.title.length > 150 ? "..." : "") : "Authentic Islamic Post.";
+    document.querySelector('meta[name="description"]').setAttribute("content", postDescription);
+    document.querySelector('meta[property="og:description"]').setAttribute("content", postDescription);
+
+    const schemaElement = document.getElementById('schema-data');
+    if (p.title && p.answer) { // p.question की जगह p.title का उपयोग करें
+        const schema = { "@context": "https://schema.org", "@type": "QAPage", "mainEntity": { "@type": "Question", "name": p.title, "text": p.title, "acceptedAnswer": { "@type": "Answer", "text": p.answer, "url": window.location.href } } };
         schemaElement.textContent = JSON.stringify(schema);
     } else {
         schemaElement.textContent = ''; 
@@ -537,7 +550,7 @@ function showMorePosts() {
         
         <h3>${p.title}</h3> 
         
-        <div class="content-section" style="font-weight: bold;">${p.title}</div>`} 
+        <div class="content-section" style="font-weight: bold;">${p.title}</div>
         
         ${p.answer ? `<div class="content-section">${makeLinksClickable(p.answer)}</div>` : ""}
         
