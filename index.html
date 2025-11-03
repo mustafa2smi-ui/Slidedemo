@@ -411,7 +411,16 @@ if (themeBtn) {
             rawDate = `${day}/${month}/${year}`;
           }
         }
-
+        return {
+          id: i + 1,
+          title: r.c[0]?.v || "", // अब इसे ही Title और Question मानेंगे
+          answer: r.c[1]?.v || "", // Answer अब Column 2 होगा
+          reference: r.c[2]?.v || "", // Reference अब Column 3 होगा
+          link: r.c[3]?.v || "", // Link अब Column 4 होगा
+          date: rawDate.trim(),
+          image: r.c[5]?.v || "" // Image अब Column 6 होगा (Date के बाद)
+        };
+          /*
         return {
           id: i + 1,
           title: r.c[0]?.v || "",
@@ -422,6 +431,7 @@ if (themeBtn) {
           date: rawDate.trim(),
           image: r.c[6]?.v || ""
         };
+        */
       }).filter(p=>p.title); 
 
       allPosts = posts; 
@@ -527,7 +537,7 @@ function showMorePosts() {
         
         <h3>${p.title}</h3> 
         
-        ${p.question ? `<div class="content-section">${p.question}</div>` : `<div class="content-section" style="font-weight: bold;">${p.title}</div>`} 
+        <div class="content-section" style="font-weight: bold;">${p.title}</div>`} 
         
         ${p.answer ? `<div class="content-section">${makeLinksClickable(p.answer)}</div>` : ""}
         
